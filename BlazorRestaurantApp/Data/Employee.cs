@@ -1,6 +1,6 @@
 ﻿namespace BlazorRestaurantApp.Data
 {
-    public class Employee
+    public class Employee : User
     {
     }
 }

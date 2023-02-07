@@ -1,5 +1,73 @@
-﻿<h3>RegistrationPage</h3>
+﻿@page "/regPage"
+@using System.ComponentModel.DataAnnotations;
+@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Services;
+@inject MongoConnection mongoConnection
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+<DataAnnotationsValidator/>
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudCard>
+            <MudCardHeader><h2>Регистрация</h2></MudCardHeader>
+            <MudCardContent>
+                <MudTextField Label="Фамилия"
+                              @bind-Value="model.Lastname" For="@(() => model.Lastname)"/>
+                <MudTextField Label="Имя"
+                              @bind-Value="model.Firstname" For="@(() => model.Firstname)"/>
+                <MudTextField Label="Отчество"
+                              @bind-Value="model.Patronymic" For="@(() => model.Patronymic)"/>
+                <MudTextField Label="Почта" Class="mt-3"
+                              @bind-Value="model.Email" For="@(() => model.Email)"/>
+                <MudTextField Label="Пароль" HelperText="Минимум 8 символов" Class="mt-3"
+                              @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password"/>
+                <MudTextField Label="Повторите пароль" Class="mt-3"
+                              @bind-Value="model.RepeatedPassword" For="@(() => model.RepeatedPassword)" InputType="InputType.Password"/>
+
+                <MudSelect  @bind-Value="@model.Role" Label="Роль">
+                    <MudSelectItem Value="@("Клиент")" />
+                    <MudSelectItem Value="@("Сотрудник")" />
+                </MudSelect>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Зарегистрироваться</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+</EditForm>
 
 @code {
+    RegistrationUserForm model = new RegistrationUserForm();
 
+
+    private void OnValidSubmit(EditContext context)
+    {
+        if (model.Role == "Клиент")
+        {
+             mongoConnection.AddUserToDataBase(new Customer()
+                {
+                    Email = model.Email,
+                    Firstname = model.Firstname,
+                    Lastname = model.Lastname,
+                    Password = model.Password,
+                    Patronymic = model.Patronymic,
+                    Role = model.Role
+                });
+        }
+        else
+        {
+             mongoConnection.AddUserToDataBase(new Employee()
+                {
+                    Email = model.Email,
+                    Firstname = model.Firstname,
+                    Lastname = model.Lastname,
+                    Password = model.Password,
+                    Patronymic = model.Patronymic,
+                    Role = model.Role
+                });
+        }
+
+        StateHasChanged();
+    }
 }

@@ -1,13 +1,11 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorRestaurantApp.Data
 {
-    public class User
+    public class RegistrationUserForm
     {
-        [BsonId]
-        public ObjectId Id { get; set; }
 
         [Required]
         public string Lastname { get; set; }
@@ -25,6 +23,10 @@ namespace BlazorRestaurantApp.Data
         [Required]
         [StringLength(30, ErrorMessage = "Пароль должен быть хотя бы 8 символов в длину", MinimumLength = 8)]
         public string Password { get; set; }
+
+        [Required]
+        [Compare(nameof(Password))]
+        public string RepeatedPassword { get; set; }
 
         [Required]
         public string Role { get; set; }
