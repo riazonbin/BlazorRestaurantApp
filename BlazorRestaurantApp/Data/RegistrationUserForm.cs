@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 using System.ComponentModel.DataAnnotations;
+using BlazorRestaurantApp.Enums;
 
 namespace BlazorRestaurantApp.Data
 {
@@ -29,6 +30,6 @@ namespace BlazorRestaurantApp.Data
         public string RepeatedPassword { get; set; }
 
         [Required]
-        public string Role { get; set; }
+        public UserRoles Role { get; set; }
     }
 }

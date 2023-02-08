@@ -31,18 +31,35 @@ namespace BlazorRestaurantApp.Services
 
         #region FindUser
 
-        public async Task<Customer> FindCustomerByEmail (string email)
+        public User? FindUserByEmail(string email)
+        {
+            var findedCustomer =  FindCustomerByEmail(email);
+            var findedEmployee =  FindEmployeeByEmail(email);
+
+            if(findedCustomer != null)
+            {
+                return findedCustomer;
+            }
+            else if(findedEmployee != null) 
+            {
+                return findedEmployee;
+            }
+
+            return null;
+        }
+
+        public  Customer FindCustomerByEmail (string email)
         {
             var filter = Builders<Customer>.Filter.Eq("Email", email);
             var collection = _database.GetCollection<Customer>("CustomersCollection");
-            return (await collection.FindAsync(filter)).FirstOrDefault();
+            return collection.Find(filter).FirstOrDefault();
         }
 
-        public async Task<Employee> FindEmployeeByEmail(string email)
+        public Employee FindEmployeeByEmail(string email)
         {
             var filter = Builders<Employee>.Filter.Eq("Email", email);
             var collection = _database.GetCollection<Employee>("EmployeesCollection");
-            return (await collection.FindAsync(filter)).FirstOrDefault();
+            return collection.Find(filter).FirstOrDefault();
         }
         #endregion
     }

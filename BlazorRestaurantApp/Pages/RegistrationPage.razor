@@ -1,6 +1,7 @@
 ﻿@page "/regPage"
 @using System.ComponentModel.DataAnnotations;
 @using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Enums;
 @using BlazorRestaurantApp.Services;
 @inject MongoConnection mongoConnection
 
@@ -25,8 +26,8 @@
                               @bind-Value="model.RepeatedPassword" For="@(() => model.RepeatedPassword)" InputType="InputType.Password"/>
 
                 <MudSelect  @bind-Value="@model.Role" Label="Роль">
-                    <MudSelectItem Value="@("Клиент")" />
-                    <MudSelectItem Value="@("Сотрудник")" />
+                    <MudSelectItem Value="@(UserRoles.Customer)">Клиент</MudSelectItem>
+                    <MudSelectItem Value="@(UserRoles.Employee)">Сотрудник</MudSelectItem>
                 </MudSelect>
             </MudCardContent>
             <MudCardActions>
@@ -37,15 +38,37 @@
 </MudGrid>
 </EditForm>
 
+@if(!isCorrectRegistrationUser)
+{
+    <MudAlert Severity="Severity.Error">Такой пользователь уже существует!</MudAlert>
+}
+@if(isCompletedRegistration)
+{
+    <MudAlert Severity="Severity.Success">Регистрация прошла успешно!</MudAlert>
+}
+
+
+
+
 @code {
     RegistrationUserForm model = new RegistrationUserForm();
+    bool isCorrectRegistrationUser = true;
+    bool isCompletedRegistration = false;
 
 
     private void OnValidSubmit(EditContext context)
     {
-        if (model.Role == "Клиент")
+        isCorrectRegistrationUser = true;
+
+        if (mongoConnection.FindUserByEmail(model.Email) != null)
         {
-             mongoConnection.AddUserToDataBase(new Customer()
+            isCorrectRegistrationUser = false;
+            return;
+        }
+
+        if (model.Role == UserRoles.Customer)
+        {
+            mongoConnection.AddUserToDataBase(new Customer()
                 {
                     Email = model.Email,
                     Firstname = model.Firstname,
@@ -57,7 +80,7 @@
         }
         else
         {
-             mongoConnection.AddUserToDataBase(new Employee()
+            mongoConnection.AddUserToDataBase(new Employee()
                 {
                     Email = model.Email,
                     Firstname = model.Firstname,
@@ -68,6 +91,8 @@
                 });
         }
 
+        isCompletedRegistration = true;
+        model = new RegistrationUserForm();
         StateHasChanged();
     }
 }

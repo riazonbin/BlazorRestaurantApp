@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using BlazorRestaurantApp.Enums;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,6 +28,6 @@ namespace BlazorRestaurantApp.Data
         public string Password { get; set; }
 
         [Required]
-        public string Role { get; set; }
+        public UserRoles Role { get; set; }
     }
 }
