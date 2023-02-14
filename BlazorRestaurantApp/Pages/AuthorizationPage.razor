@@ -1,5 +1,68 @@
-﻿<h3>AuthorizationPage</h3>
+﻿@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Enums;
+@using BlazorRestaurantApp.Services;
+@inject MongoConnection mongoConnection
+@inject IDialogService DialogService
+
+@page "/authorizationPage"
+
+<EditForm Model="@user" OnValidSubmit="OnValidSubmit">
+<DataAnnotationsValidator/>
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudCard>
+            <MudCardHeader><h2>Авторизация</h2></MudCardHeader>
+            <MudCardContent>
+                <MudTextField Label="Почта" Class="mt-3"
+                              @bind-Value="user.Email" For="@(() => user.Email)"/>
+                <MudTextField Label="Пароль" HelperText="Минимум 8 символов" Class="mt-3"
+                              @bind-Value="user.Password" For="@(() => user.Password)" InputType="InputType.Password"/>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Зарегистрироваться</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+</EditForm>
+
+@if (!isCorrectAuthorizationUser)
+{
+            <MudAlert Severity="Severity.Error">Такого пользователя не существует!</MudAlert>
+}
+
 
 @code {
+    User user = new User();
+
+    bool isCorrectAuthorizationUser = true;
+
+    private void OnValidSubmit(EditContext context)
+    {
+        isCorrectAuthorizationUser = true;
+        User? foundedUser;
+
+        if ((foundedUser = mongoConnection.FindUserByEmail(user.Email)) == null)
+        {
+            isCorrectAuthorizationUser = false;
+            return;
+        }
+        else
+        {
+            OpenDialog(foundedUser);
+        }
+
+    }
+
+    private void OpenDialog(User user)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<MudDialog>($"Добро пожаловать, {user.Firstname}!");
+    }
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
 
 }

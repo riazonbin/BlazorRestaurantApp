@@ -1,6 +1,18 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿
+<MudNavMenu Class="mud-height-full" Style="background-color:white">
+    <MudText Typo="Typo.h6" Class="px-4">
+        Ресторан <MudIcon Icon="@Icons.Material.Filled.Restaurant"></MudIcon> 
+    </MudText>
+    <MudDivider Class="my-2" />
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
+    <MudNavLink Href="/regPage" Icon="@Icons.Material.Filled.HowToReg">Регистрация</MudNavLink>
+    <MudNavLink Href="/authorizationPage" Icon="@Icons.Material.Filled.SwitchAccount">Авторизация</MudNavLink>
+</MudNavMenu>
+
+
+@*<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorRestaurantApp</a>
+        <a class="navbar-brand" href="">Ресторан</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -21,7 +33,7 @@
             </NavLink>
         </div>
     </nav>
-</div>
+</div>*@
 
 @code {
     private bool collapseNavMenu = true;
