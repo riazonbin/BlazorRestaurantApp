@@ -3,11 +3,11 @@
 @using BlazorRestaurantApp.Services;
 @inject MongoConnection mongoConnection
 @inject IDialogService DialogService
+@inject NavigationManager navManager;
 
 @page "/authorizationPage"
 
-<EditForm Model="@user" OnValidSubmit="OnValidSubmit">
-<DataAnnotationsValidator/>
+<form @onsubmit="@(() => OnValidSubmit())">
 <MudGrid>
     <MudItem xs="12" sm="7">
         <MudCard>
@@ -19,16 +19,16 @@
                               @bind-Value="user.Password" For="@(() => user.Password)" InputType="InputType.Password"/>
             </MudCardContent>
             <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Зарегистрироваться</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Войти</MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
 </MudGrid>
-</EditForm>
+</form>
 
 @if (!isCorrectAuthorizationUser)
 {
-            <MudAlert Severity="Severity.Error">Такого пользователя не существует!</MudAlert>
+    <MudAlert Severity="Severity.Error">Такого пользователя не существует!</MudAlert>
 }
 
 
@@ -37,7 +37,7 @@
 
     bool isCorrectAuthorizationUser = true;
 
-    private void OnValidSubmit(EditContext context)
+    private void OnValidSubmit()
     {
         isCorrectAuthorizationUser = true;
         User? foundedUser;
@@ -49,20 +49,16 @@
         }
         else
         {
-            OpenDialog(foundedUser);
+            if(foundedUser.Role == UserRoles.Customer)
+            {
+                navManager.NavigateTo("/customerManagementPage");
+            }
+            else
+            {
+                navManager.NavigateTo("/employeeManagementPage");
+            }
         }
 
     }
-
-    private void OpenDialog(User user)
-    {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<MudDialog>($"Добро пожаловать, {user.Firstname}!");
-    }
-
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
-    void Submit() => MudDialog.Close(DialogResult.Ok(true));
-    void Cancel() => MudDialog.Cancel();
 
 }
