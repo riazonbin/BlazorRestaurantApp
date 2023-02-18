@@ -1,4 +1,8 @@
-﻿@using MudBlazor
+﻿@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Services;
+@using MudBlazor
+@inject ILocalStorageService localStorageService;
+@inject UserService userService;
 @inherits LayoutComponentBase
 
 <PageTitle>Ресторан</PageTitle>
@@ -13,10 +17,22 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <a target="_blank" href="/personalCardPage"> @userService.currentUser?.Firstname <p></p> </a>
         </div>
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        User potentialUser = await localStorageService.GetAsync<User>("CurrentUser");
+        if (potentialUser is not null)
+        {
+            userService.currentUser = potentialUser;
+        }
+    }
+}

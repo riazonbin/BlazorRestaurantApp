@@ -1,9 +1,12 @@
 ﻿@using BlazorRestaurantApp.Data;
 @using BlazorRestaurantApp.Enums;
 @using BlazorRestaurantApp.Services;
+@using System.Text.Json;
+@using Microsoft.AspNetCore.Identity;
 @inject MongoConnection mongoConnection
 @inject IDialogService DialogService
 @inject NavigationManager navManager;
+@inject ILocalStorageService localStorageService;
 
 @page "/authorizationPage"
 
@@ -49,6 +52,7 @@
         }
         else
         {
+            localStorageService.SetAsync<User>("CurrentUser", foundedUser);
             if(foundedUser.Role == UserRoles.Customer)
             {
                 navManager.NavigateTo("/customerManagementPage");
