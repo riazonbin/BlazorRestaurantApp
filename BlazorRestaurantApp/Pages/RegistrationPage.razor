@@ -24,11 +24,6 @@
                               @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password"/>
                 <MudTextField Label="Повторите пароль" Class="mt-3"
                               @bind-Value="model.RepeatedPassword" For="@(() => model.RepeatedPassword)" InputType="InputType.Password"/>
-
-                <MudSelect  @bind-Value="@model.Role" Label="Роль">
-                    <MudSelectItem Value="@(UserRoles.Customer)">Клиент</MudSelectItem>
-                    <MudSelectItem Value="@(UserRoles.Employee)">Сотрудник</MudSelectItem>
-                </MudSelect>
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Зарегистрироваться</MudButton>
@@ -51,7 +46,10 @@
 
 
 @code {
-    RegistrationUserForm model = new RegistrationUserForm();
+    RegistrationUserForm model = new RegistrationUserForm()
+    {
+        Role = UserRoles.Customer
+    };
     bool isCorrectRegistrationUser = true;
     bool isCompletedRegistration = false;
 
@@ -66,30 +64,15 @@
             return;
         }
 
-        if (model.Role == UserRoles.Customer)
-        {
-            mongoConnection.AddUserToDataBase(new Customer()
-                {
-                    Email = model.Email,
-                    Firstname = model.Firstname,
-                    Lastname = model.Lastname,
-                    Password = model.Password,
-                    Patronymic = model.Patronymic,
-                    Role = model.Role
-                });
-        }
-        else
-        {
-            mongoConnection.AddUserToDataBase(new Employee()
-                {
-                    Email = model.Email,
-                    Firstname = model.Firstname,
-                    Lastname = model.Lastname,
-                    Password = model.Password,
-                    Patronymic = model.Patronymic,
-                    Role = model.Role
-                });
-        }
+        mongoConnection.AddUserToDataBase(new Customer()
+            {
+                Email = model.Email,
+                Firstname = model.Firstname,
+                Lastname = model.Lastname,
+                Password = model.Password,
+                Patronymic = model.Patronymic,
+                Role = model.Role
+            });
 
         isCompletedRegistration = true;
         model = new RegistrationUserForm();

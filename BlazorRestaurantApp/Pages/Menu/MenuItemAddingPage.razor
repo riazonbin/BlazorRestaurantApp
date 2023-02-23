@@ -1,0 +1,52 @@
+﻿@page "/menu/add-item"
+@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Services;
+@inject FileSystemService fileSystemService
+@inject MongoConnection mongoConnection;
+
+<MudForm>
+    <MudTextField @bind-Value="menuItem.Name" Label="Name" />
+    <MudTextField @bind-Value="menuItem.Description" Label="Description" />
+    <MudTextField @bind-Value="menuItem.Price" Label="Price" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@AddMenuItem">Add Item</MudButton>
+</MudForm>
+
+<MudCard>
+    <MudCardContent>
+        <img src="@imageData" alt="Menu Item Image" />
+    </MudCardContent>
+</MudCard>
+
+<div>
+    <InputFile OnChange="@HandleFileUpload" />
+</div>
+
+@code {
+    private MenuItem menuItem = new MenuItem();
+    private IBrowserFile file;
+    private string imageData;
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+
+        using var stream = file.OpenReadStream();
+        var buffer = new byte[file.Size];
+        await stream.ReadAsync(buffer, 0, (int)file.Size);
+
+        var base64Encoded = Convert.ToBase64String(buffer);
+        imageData = $"data:{file.ContentType};base64,{base64Encoded}";
+    }
+
+    private async Task AddMenuItem()
+    {
+        // Upload the image file to GridFS using the MongoDB.Driver package
+        var imageId = await fileSystemService.UploadItemToDb(file.OpenReadStream(), file.Name.ToString());
+
+        // Add the menu item to the database using the MongoDB.Driver package
+        menuItem.ImageId = imageId;
+
+        mongoConnection.AddMenuItemToDatabase(menuItem);
+        // Redirect the user back to the menu page
+    }
+}

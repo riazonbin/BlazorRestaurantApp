@@ -1,0 +1,74 @@
+﻿@page "/menu/edit-item/{id}"
+@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Services;
+@using MongoDB.Bson;
+@inject FileSystemService fileSystemService
+@inject MongoConnection mongoConnection
+
+<MudForm>
+    <MudTextField @bind-Value="menuItem.Name" Label="Name" />
+    <MudTextField @bind-Value="menuItem.Description" Label="Description" />
+    <MudTextField @bind-Value="menuItem.Price" Label="Price" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateMenuItem">Update Item</MudButton>
+</MudForm>
+
+<MudCard>
+    <MudCardContent>
+        <img src="@imageData" alt="Menu Item Image" />
+    </MudCardContent>
+</MudCard>
+
+<div>
+    <InputFile OnChange="@HandleFileUpload" />
+</div>
+
+@code {
+    private MenuItem menuItem = new MenuItem();
+    private IBrowserFile file;
+    private string imageData;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        // Retrieve the menu item from the database using the MongoDB.Driver package
+        menuItem = await mongoConnection.FindMenuItemById(Id);
+        imageData = GetImageSource(menuItem.ImageId);
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+
+        using var stream = file.OpenReadStream();
+        var buffer = new byte[file.Size];
+        await stream.ReadAsync(buffer, 0, (int)file.Size);
+
+        var base64Encoded = Convert.ToBase64String(buffer);
+        imageData = $"data:{file.ContentType};base64,{base64Encoded}";
+    }
+
+    private async Task UpdateMenuItem()
+    {
+        // Upload the new image file to GridFS using the MongoDB.Driver package
+        var newImageId = await fileSystemService.UpdateItemInDb(file.OpenReadStream(), menuItem.ImageId, file.Name);
+
+        // Update the menu item in the database using the MongoDB.Driver package
+        menuItem.ImageId = newImageId;
+        // Redirect the user back to the menu page
+    }
+
+    private string GetImageSource(ObjectId imageId)
+    {
+        // Retrieve the image data from the database using the MongoDB.Driver package
+        var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
+
+        // Convert the image data to a base64-encoded string
+        var base64Image = Convert.ToBase64String(imageData);
+
+        // Return the image source string
+        return $"data:image/png;base64,{base64Image}";
+    }
+}
+

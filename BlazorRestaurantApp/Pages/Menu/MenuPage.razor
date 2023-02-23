@@ -1,0 +1,53 @@
+﻿@page "/menu"
+@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Services;
+@using MongoDB.Bson;
+@inject MongoConnection mongoConnection
+@inject FileSystemService fileSystemService
+@inject NavigationManager navigationManager
+
+@foreach (var menuItem in menuItems)
+{
+    var imageData = GetImageSource(menuItem.ImageId);
+    <MudCard>
+        <MudCardMedia>
+
+        </MudCardMedia>
+        <MudCardContent>
+            <h3>@menuItem.Name</h3>
+            <p>@menuItem.Description</p>
+            <p>@menuItem.Price.ToString("C")</p>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToEditItem(menuItem.Id.ToString()))">Edit</MudButton>
+        </MudCardContent>
+    </MudCard>
+    <img src="@imageData" alt="@menuItem.Name" />
+    }
+
+@code {
+    private List<MenuItem> menuItems = new List<MenuItem>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        // Retrieve all menu items from the database using the MongoDB.Driver package
+        menuItems = await mongoConnection.GetAllMenuItems();
+        await base.OnInitializedAsync();
+    }
+
+    private string GetImageSource(ObjectId imageId)
+    {
+        // Retrieve the image data from the database using the MongoDB.Driver package
+        var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
+
+        // Convert the image data to a base64-encoded string
+        var base64Image = Convert.ToBase64String(imageData);
+
+        // Return the image source string
+        return $"data:image/png;base64,{base64Image}";
+    }
+
+    private void NavigateToEditItem(string itemId)
+    {
+        // Navigate to the Edit Item page for the selected menu item
+        navigationManager.NavigateTo($"/menu/edit-item/{itemId}");
+    }
+}

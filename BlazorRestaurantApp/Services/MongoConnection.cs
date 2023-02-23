@@ -1,5 +1,6 @@
 ﻿using BlazorRestaurantApp.Data;
 using DnsClient;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BlazorRestaurantApp.Services
@@ -26,6 +27,28 @@ namespace BlazorRestaurantApp.Services
         {
             var collection = _database.GetCollection<Employee>("EmployeesCollection");
             collection.InsertOneAsync(user);
+        }
+        #endregion
+
+        #region AddingMenuItemsToDatabase
+        public void AddMenuItemToDatabase(MenuItem menuItem)
+        {
+            var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
+            collection.InsertOneAsync(menuItem);
+        }
+        #endregion
+
+        #region FindMenuItems
+        public async Task<MenuItem> FindMenuItemById(string id)
+        {
+            var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
+            return (await collection.FindAsync(x => x.Id == ObjectId.Parse(id))).FirstOrDefault();
+        }
+
+        public async Task<List<MenuItem>> GetAllMenuItems()
+        {
+            var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
+            return await (await collection.FindAsync(new BsonDocument())).ToListAsync();
         }
         #endregion
 
@@ -62,5 +85,7 @@ namespace BlazorRestaurantApp.Services
             return collection.Find(filter).FirstOrDefault();
         }
         #endregion
+
+        
     }
 }
