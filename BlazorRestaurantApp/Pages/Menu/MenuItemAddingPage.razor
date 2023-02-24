@@ -1,6 +1,8 @@
 ﻿@page "/menu/add-item"
 @using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Enums;
 @using BlazorRestaurantApp.Services;
+@using System.ComponentModel.DataAnnotations;
 @inject FileSystemService fileSystemService
 @inject MongoConnection mongoConnection;
 @inject NavigationManager navigationManager;
@@ -17,6 +19,16 @@
                             <MudTextField @bind-Value="menuItem.Name" Label="Наименование" For="@(() => menuItem.Name)"/>
                             <MudTextField @bind-Value="menuItem.Description" Label="Описание" For="@(() => menuItem.Description)" />
                             <MudTextField @bind-Value="menuItem.Price" Label="Стоимость" For="@(() => menuItem.Price)" />
+                            <MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@menuItem.DishType">
+                                @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
+                                {
+                                    var valueName = typeof(DishTypes).GetMember(typeOfDish.ToString())[0]
+                                    .GetCustomAttributes(typeof(DisplayAttribute), false)
+                                    .OfType<DisplayAttribute>()
+                                    .FirstOrDefault()?.Name;
+                                    <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
+                                }
+                            </MudSelect>
                         </MudCardContent>
                     </MudCard>
                 </MudItem>
@@ -32,7 +44,7 @@
                         <div class="title">Загруженное изображение:</div>
                         <div class="subtitle">@file?.Name</div>
                     </div>
-                    <MudFileUpload T="IBrowserFile" OnFilesChanged="@HandleFileUpload" Accept=".png" SuppressOnChangeWhenInvalid>
+                    <MudFileUpload T="IBrowserFile" OnFilesChanged="@HandleFileUpload" Accept=".png, .jpg, .jpeg" SuppressOnChangeWhenInvalid>
                     <ButtonTemplate>
                         <MudButton HtmlTag="label"
                                     Variant="Variant.Filled"
@@ -79,15 +91,12 @@
     {
         if(file is not null)
         {
-            // Upload the image file to GridFS using the MongoDB.Driver package
             var imageId = await fileSystemService.UploadItemToDb(file.OpenReadStream(), file.Name.ToString());
 
-            // Add the menu item to the database using the MongoDB.Driver package
             menuItem.ImageId = imageId;
         }
         mongoConnection.AddMenuItemToDatabase(menuItem);
 
         navigationManager.NavigateTo("/menu");
-        // Redirect the user back to the menu page
     }
 }

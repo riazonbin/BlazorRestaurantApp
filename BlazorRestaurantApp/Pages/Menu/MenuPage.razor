@@ -6,6 +6,7 @@
 @inject FileSystemService fileSystemService
 @inject NavigationManager navigationManager
 
+<MudGrid Spacing="5"> 
 @foreach (var menuItem in menuItems)
 {
     string imageData = "";
@@ -13,18 +14,23 @@
     {
         imageData = GetImageSource(menuItem.ImageId);
     }
-    <MudCard Style="width:300px">
-        <MudCardMedia Image="@imageData" Height="150"/>
-        <MudCardContent>
-            <h3>@menuItem.Name</h3>
-            <p>@menuItem.Description</p>
-            <p>@menuItem.Price.ToString("C")</p>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToEditItem(menuItem.Id.ToString()))">Edit</MudButton>
-        </MudCardContent>
-    </MudCard>
+    <MudItem xs="12" sm="6" md="4" lg="3">
+        <MudCard>
+            <MudCardMedia Image="@imageData"/>
+            <MudCardContent>
+                <h3>@menuItem.Name</h3>
+                <p>@menuItem.Description</p>
+                <h4>@menuItem.Price.ToString("C")</h4>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToEditItem(menuItem.Id.ToString()))">Edit</MudButton>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
 }
 
-<br/>
+</MudGrid>
+
+<MudDivider/>
+<br /><br />
 
 <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => NavigateToAddNewItem())">Добавить</MudButton>
 
@@ -39,32 +45,35 @@
 
     protected async override Task OnInitializedAsync()
     {
-        // Retrieve all menu items from the database using the MongoDB.Driver package
         menuItems = await mongoConnection.GetAllMenuItems();
         await base.OnInitializedAsync();
     }
 
     private string GetImageSource(ObjectId imageId)
     {
-        // Retrieve the image data from the database using the MongoDB.Driver package
-        var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
+        try
+        {
+            if (imageId != ObjectId.Empty)
+            {
+                var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
 
-        // Convert the image data to a base64-encoded string
-        var base64Image = Convert.ToBase64String(imageData);
+                var base64Image = Convert.ToBase64String(imageData);
 
-        // Return the image source string
-        return $"data:image/png;base64,{base64Image}";
+                return $"data:image/png;base64,{base64Image}";
+            }
+            return "";
+        }
+        catch{ return ""; }
+
     }
 
     private void NavigateToEditItem(string itemId)
     {
-        // Navigate to the Edit Item page for the selected menu item
         navigationManager.NavigateTo($"/menu/edit-item/{itemId}");
     }
 
     private void NavigateToAddNewItem()
     {
-        // Navigate to the Add New Item page
         navigationManager.NavigateTo("/menu/add-item");
     }
 

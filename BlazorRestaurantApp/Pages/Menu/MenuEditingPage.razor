@@ -1,7 +1,9 @@
 ﻿@page "/menu/edit-item/{id}"
 @using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Enums;
 @using BlazorRestaurantApp.Services;
 @using MongoDB.Bson;
+@using System.ComponentModel.DataAnnotations;
 @inject FileSystemService fileSystemService
 @inject MongoConnection mongoConnection
 @inject NavigationManager navigationManager
@@ -11,7 +13,17 @@
         <MudForm>
             <MudTextField @bind-Value="menuItem.Name" Label="Наименование" />
             <MudTextField @bind-Value="menuItem.Description" Label="Описание" />
-            <MudTextField @bind-Value="menuItem.Price" Label="Цена" />
+            <MudTextField @bind-Value="menuItem.Price" Label="Стоимость" />
+            <MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@menuItem.DishType">
+                @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
+                {
+                    var valueName = typeof(DishTypes).GetMember(typeOfDish.ToString())[0]
+                    .GetCustomAttributes(typeof(DisplayAttribute), false)
+                    .OfType<DisplayAttribute>()
+                    .FirstOrDefault()?.Name;
+                                        <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
+                }
+            </MudSelect>
 
             <MudFileUpload T="IBrowserFile" OnFilesChanged="@HandleFileUpload">
                 <ButtonTemplate>
@@ -27,7 +39,7 @@
 
             <MudDivider></MudDivider>
 
-            <MudImage Src="@imageData" alt="Menu Item Image" />
+            <MudImage Src="@imageData" alt="Блюдо из меню" />
 
             <MudDivider></MudDivider>
 
@@ -48,7 +60,6 @@
 
     protected async override Task OnInitializedAsync()
     {
-        // Retrieve the menu item from the database using the MongoDB.Driver package
         menuItem = await mongoConnection.FindMenuItemById(Id);
         imageData = GetImageSource(menuItem.ImageId);
     }
@@ -71,12 +82,10 @@
     {
         if(file is not null)
         {
-            // Upload the new image file to GridFS using the MongoDB.Driver package
             var newImageId = await fileSystemService.UpdateItemInDb(file.OpenReadStream(), menuItem, file.Name);
             menuItem.ImageId = newImageId;
         }
         mongoConnection.UpdateMenuItem(menuItem);
-        // Redirect the user back to the menu page
         navigationManager.NavigateTo("/menu");
     }
 
@@ -84,13 +93,10 @@
     {
         try
         {
-            // Retrieve the image data from the database using the MongoDB.Driver package
             var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
 
-            // Convert the image data to a base64-encoded string
             var base64Image = Convert.ToBase64String(imageData);
 
-            // Return the image source string
             return $"data:image/png;base64,{base64Image}";
         }
         catch { return ""; }
