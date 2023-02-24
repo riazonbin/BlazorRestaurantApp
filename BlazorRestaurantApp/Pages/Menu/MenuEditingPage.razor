@@ -4,23 +4,39 @@
 @using MongoDB.Bson;
 @inject FileSystemService fileSystemService
 @inject MongoConnection mongoConnection
-
-<MudForm>
-    <MudTextField @bind-Value="menuItem.Name" Label="Name" />
-    <MudTextField @bind-Value="menuItem.Description" Label="Description" />
-    <MudTextField @bind-Value="menuItem.Price" Label="Price" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateMenuItem">Update Item</MudButton>
-</MudForm>
+@inject NavigationManager navigationManager
 
 <MudCard>
     <MudCardContent>
-        <img src="@imageData" alt="Menu Item Image" />
+        <MudForm>
+            <MudTextField @bind-Value="menuItem.Name" Label="Наименование" />
+            <MudTextField @bind-Value="menuItem.Description" Label="Описание" />
+            <MudTextField @bind-Value="menuItem.Price" Label="Цена" />
+
+            <MudFileUpload T="IBrowserFile" OnFilesChanged="@HandleFileUpload">
+                <ButtonTemplate>
+                    <MudButton HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.CloudUpload"
+                                for="@context">
+                        Загрузить файл
+                    </MudButton>
+                </ButtonTemplate>
+            </MudFileUpload>
+
+            <MudDivider></MudDivider>
+
+            <MudImage Src="@imageData" alt="Menu Item Image" />
+
+            <MudDivider></MudDivider>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateMenuItem">Обновить</MudButton>
+        </MudForm>
     </MudCardContent>
 </MudCard>
 
-<div>
-    <InputFile OnChange="@HandleFileUpload" />
-</div>
+
 
 @code {
     private MenuItem menuItem = new MenuItem();
@@ -41,34 +57,43 @@
     {
         file = e.File;
 
-        using var stream = file.OpenReadStream();
-        var buffer = new byte[file.Size];
-        await stream.ReadAsync(buffer, 0, (int)file.Size);
+        using var stream = file.OpenReadStream(2000000);
+        var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
 
-        var base64Encoded = Convert.ToBase64String(buffer);
-        imageData = $"data:{file.ContentType};base64,{base64Encoded}";
+        var imageDataBytes = memoryStream.ToArray();
+        var base64ImageString = Convert.ToBase64String(imageDataBytes);
+
+        imageData = $"data:{file.ContentType};base64,{base64ImageString}";
     }
 
     private async Task UpdateMenuItem()
     {
-        // Upload the new image file to GridFS using the MongoDB.Driver package
-        var newImageId = await fileSystemService.UpdateItemInDb(file.OpenReadStream(), menuItem.ImageId, file.Name);
-
-        // Update the menu item in the database using the MongoDB.Driver package
-        menuItem.ImageId = newImageId;
+        if(file is not null)
+        {
+            // Upload the new image file to GridFS using the MongoDB.Driver package
+            var newImageId = await fileSystemService.UpdateItemInDb(file.OpenReadStream(), menuItem, file.Name);
+            menuItem.ImageId = newImageId;
+        }
+        mongoConnection.UpdateMenuItem(menuItem);
         // Redirect the user back to the menu page
+        navigationManager.NavigateTo("/menu");
     }
 
     private string GetImageSource(ObjectId imageId)
     {
-        // Retrieve the image data from the database using the MongoDB.Driver package
-        var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
+        try
+        {
+            // Retrieve the image data from the database using the MongoDB.Driver package
+            var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
 
-        // Convert the image data to a base64-encoded string
-        var base64Image = Convert.ToBase64String(imageData);
+            // Convert the image data to a base64-encoded string
+            var base64Image = Convert.ToBase64String(imageData);
 
-        // Return the image source string
-        return $"data:image/png;base64,{base64Image}";
+            // Return the image source string
+            return $"data:image/png;base64,{base64Image}";
+        }
+        catch { return ""; }
     }
 }
 

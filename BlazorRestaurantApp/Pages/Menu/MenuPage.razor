@@ -8,11 +8,13 @@
 
 @foreach (var menuItem in menuItems)
 {
-    var imageData = GetImageSource(menuItem.ImageId);
-    <MudCard>
-        <MudCardMedia>
-
-        </MudCardMedia>
+    string imageData = "";
+    if(menuItem.ImageId != ObjectId.Empty)
+    {
+        imageData = GetImageSource(menuItem.ImageId);
+    }
+    <MudCard Style="width:300px">
+        <MudCardMedia Image="@imageData" Height="150"/>
         <MudCardContent>
             <h3>@menuItem.Name</h3>
             <p>@menuItem.Description</p>
@@ -20,11 +22,20 @@
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToEditItem(menuItem.Id.ToString()))">Edit</MudButton>
         </MudCardContent>
     </MudCard>
-    <img src="@imageData" alt="@menuItem.Name" />
-    }
+}
+
+<br/>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => NavigateToAddNewItem())">Добавить</MudButton>
+
+@if (!isCorrectMenuItem)
+{
+        <MudAlert Severity="Severity.Error">Такой пользователь уже существует!</MudAlert>
+}
 
 @code {
     private List<MenuItem> menuItems = new List<MenuItem>();
+    bool isCorrectMenuItem = true;
 
     protected async override Task OnInitializedAsync()
     {
@@ -50,4 +61,11 @@
         // Navigate to the Edit Item page for the selected menu item
         navigationManager.NavigateTo($"/menu/edit-item/{itemId}");
     }
+
+    private void NavigateToAddNewItem()
+    {
+        // Navigate to the Add New Item page
+        navigationManager.NavigateTo("/menu/add-item");
+    }
+
 }

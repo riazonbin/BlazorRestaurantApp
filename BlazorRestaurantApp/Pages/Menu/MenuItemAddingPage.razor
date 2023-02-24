@@ -3,23 +3,58 @@
 @using BlazorRestaurantApp.Services;
 @inject FileSystemService fileSystemService
 @inject MongoConnection mongoConnection;
+@inject NavigationManager navigationManager;
 
-<MudForm>
-    <MudTextField @bind-Value="menuItem.Name" Label="Name" />
-    <MudTextField @bind-Value="menuItem.Description" Label="Description" />
-    <MudTextField @bind-Value="menuItem.Price" Label="Price" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@AddMenuItem">Add Item</MudButton>
-</MudForm>
+<h1>Добавление нового блюда</h1>
 
-<MudCard>
-    <MudCardContent>
-        <img src="@imageData" alt="Menu Item Image" />
-    </MudCardContent>
-</MudCard>
+<EditForm Model="menuItem" OnValidSubmit="@AddMenuItem" Context="contextMenu">
+    <MudCard Elevation="2">
+        <MudCardContent>
+            <MudGrid xs="12" sm="7">
+                <MudItem>
+                    <MudCard>
+                        <MudCardContent>
+                            <MudTextField @bind-Value="menuItem.Name" Label="Наименование" For="@(() => menuItem.Name)"/>
+                            <MudTextField @bind-Value="menuItem.Description" Label="Описание" For="@(() => menuItem.Description)" />
+                            <MudTextField @bind-Value="menuItem.Price" Label="Стоимость" For="@(() => menuItem.Price)" />
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
 
-<div>
-    <InputFile OnChange="@HandleFileUpload" />
-</div>
+            <MudDivider />
+
+
+            <MudCard>
+                <MudCardContent>
+                    <MudImage Src="@imageData" alt="Изображение" />
+                    <div class="image-info">
+                        <div class="title">Загруженное изображение:</div>
+                        <div class="subtitle">@file?.Name</div>
+                    </div>
+                    <MudFileUpload T="IBrowserFile" OnFilesChanged="@HandleFileUpload" Accept=".png" SuppressOnChangeWhenInvalid>
+                    <ButtonTemplate>
+                        <MudButton HtmlTag="label"
+                                    Variant="Variant.Filled"
+                                    Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.CloudUpload"
+                                    for="@context">
+                            Загрузить файл
+                        </MudButton>
+                    </ButtonTemplate>
+                    </MudFileUpload>
+                </MudCardContent>
+            </MudCard>
+
+            <MudDivider />
+
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Добавить</MudButton>
+            </MudCardActions>
+        </MudCardContent>
+    </MudCard>
+
+</EditForm>
 
 @code {
     private MenuItem menuItem = new MenuItem();
@@ -30,23 +65,29 @@
     {
         file = e.File;
 
-        using var stream = file.OpenReadStream();
-        var buffer = new byte[file.Size];
-        await stream.ReadAsync(buffer, 0, (int)file.Size);
+        using var stream = file.OpenReadStream(2000000);
+        var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
 
-        var base64Encoded = Convert.ToBase64String(buffer);
-        imageData = $"data:{file.ContentType};base64,{base64Encoded}";
+        var imageDataBytes = memoryStream.ToArray();
+        var base64ImageString = Convert.ToBase64String(imageDataBytes);
+
+        imageData = $"data:{file.ContentType};base64,{base64ImageString}";
     }
 
     private async Task AddMenuItem()
     {
-        // Upload the image file to GridFS using the MongoDB.Driver package
-        var imageId = await fileSystemService.UploadItemToDb(file.OpenReadStream(), file.Name.ToString());
+        if(file is not null)
+        {
+            // Upload the image file to GridFS using the MongoDB.Driver package
+            var imageId = await fileSystemService.UploadItemToDb(file.OpenReadStream(), file.Name.ToString());
 
-        // Add the menu item to the database using the MongoDB.Driver package
-        menuItem.ImageId = imageId;
-
+            // Add the menu item to the database using the MongoDB.Driver package
+            menuItem.ImageId = imageId;
+        }
         mongoConnection.AddMenuItemToDatabase(menuItem);
+
+        navigationManager.NavigateTo("/menu");
         // Redirect the user back to the menu page
     }
 }

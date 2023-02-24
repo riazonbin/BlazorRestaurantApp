@@ -34,9 +34,12 @@ namespace BlazorRestaurantApp.Services
 
 
         #region Update
-        public async Task<ObjectId> UpdateItemInDb(Stream stream, ObjectId oldFileId, string newFileName)
+        public async Task<ObjectId> UpdateItemInDb(Stream stream, MenuItem menuItem, string newFileName)
         {
-            await _gridFS.DeleteAsync(oldFileId);
+            if(menuItem.ImageId != ObjectId.Empty) 
+            {
+                await _gridFS.DeleteAsync(menuItem.ImageId);
+            }
             return await _gridFS.UploadFromStreamAsync(newFileName, stream);
         }
         #endregion

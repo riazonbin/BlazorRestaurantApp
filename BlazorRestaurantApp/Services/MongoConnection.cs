@@ -86,6 +86,12 @@ namespace BlazorRestaurantApp.Services
         }
         #endregion
 
-        
+        #region UpdateData
+        public void UpdateMenuItem(MenuItem item)
+        {
+            var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
+            collection.ReplaceOne(x => x.Id == item.Id, item);
+        }
+        #endregion
     }
 }
