@@ -6,6 +6,7 @@
 @inject FileSystemService fileSystemService
 @inject MongoConnection mongoConnection;
 @inject NavigationManager navigationManager;
+@inject ISnackbar Snackbar
 
 <h1>Добавление нового блюда</h1>
 
@@ -93,14 +94,22 @@
 
     private async Task AddMenuItem()
     {
-        if(file is not null)
+        try
         {
-            var imageId = await fileSystemService.UploadItemToDb(file.OpenReadStream(), file.Name.ToString());
+            if (file is not null)
+            {
+                var imageId = await fileSystemService.UploadItemToDb(file.OpenReadStream(), file.Name.ToString());
 
-            menuItem.ImageId = imageId;
+                menuItem.ImageId = imageId;
+            }
+            mongoConnection.AddMenuItemToDatabase(menuItem);
+
+            navigationManager.NavigateTo("/menu");
         }
-        mongoConnection.AddMenuItemToDatabase(menuItem);
+        catch
+        {
+            Snackbar.Add("Слишкой большой вес изображения!");
+        }
 
-        navigationManager.NavigateTo("/menu");
     }
 }

@@ -7,6 +7,7 @@
 @inject FileSystemService fileSystemService
 @inject MongoConnection mongoConnection
 @inject NavigationManager navigationManager
+@inject ISnackbar Snackbar;
 
 <MudCard>
     <MudCardContent>
@@ -46,8 +47,10 @@
             <MudImage Src="@imageData" alt="Блюдо из меню" />
 
             <MudDivider></MudDivider>
-
+            <br />
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateMenuItem">Обновить</MudButton>
+            <br /><br />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@DeleteMenuItem">Удалить из меню</MudButton>
         </MudForm>
     </MudCardContent>
 </MudCard>
@@ -84,12 +87,25 @@
 
     private async Task UpdateMenuItem()
     {
-        if(file is not null)
+        try
         {
-            var newImageId = await fileSystemService.UpdateItemInDb(file.OpenReadStream(), menuItem, file.Name);
-            menuItem.ImageId = newImageId;
+            if (file is not null)
+            {
+                var newImageId = await fileSystemService.UpdateItemInDb(file.OpenReadStream(), menuItem, file.Name);
+                menuItem.ImageId = newImageId;
+            }
+            mongoConnection.UpdateMenuItem(menuItem);
+            navigationManager.NavigateTo("/menu");
         }
-        mongoConnection.UpdateMenuItem(menuItem);
+        catch
+        {
+            Snackbar.Add("Слишком большой вес изображения!");    
+        }
+    }
+
+    private async Task DeleteMenuItem()
+    {
+        await mongoConnection.DeleteMenuItemAsync(menuItem);
         navigationManager.NavigateTo("/menu");
     }
 
