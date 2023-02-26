@@ -22,6 +22,10 @@
                             <MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@menuItem.DishType">
                                 @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
                                 {
+                                    if(typeOfDish == DishTypes.None)
+                                    {
+                                        continue;
+                                    }
                                     var valueName = typeof(DishTypes).GetMember(typeOfDish.ToString())[0]
                                     .GetCustomAttributes(typeof(DisplayAttribute), false)
                                     .OfType<DisplayAttribute>()

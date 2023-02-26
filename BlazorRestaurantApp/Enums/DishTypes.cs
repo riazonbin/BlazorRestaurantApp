@@ -24,6 +24,8 @@ namespace BlazorRestaurantApp.Enums
         [Display(Name = "Десерты")]
         Desserts,
         [Display(Name = "Напитки")]
-        Beverage
+        Beverage,
+        [Display(Name = "Отсутствует")]
+        None
     }
 }
