@@ -3,6 +3,7 @@
 @using MudBlazor
 @inject ILocalStorageService localStorageService;
 @inject UserService userService;
+@inject MongoConnection mongoConnection;
 @inherits LayoutComponentBase
 
 <PageTitle>Ресторан</PageTitle>
@@ -48,6 +49,11 @@
         if (potentialUser is not null)
         {
             userService.currentUser = potentialUser;
+        }
+
+        if(!mongoConnection.IsDefaultManagerExists())
+        {
+            mongoConnection.AddDefaultManagerToDataBase();
         }
     }
 

@@ -8,6 +8,12 @@
 @inject MongoConnection mongoConnection
 @inject NavigationManager navigationManager
 @inject ISnackbar Snackbar;
+@inject UserService userService;
+
+@if(userService.currentUser?.Role != UserRoles.Employee)
+{
+    return;
+}
 
 <MudCard>
     <MudCardContent>
@@ -26,7 +32,7 @@
                     .GetCustomAttributes(typeof(DisplayAttribute), false)
                     .OfType<DisplayAttribute>()
                     .FirstOrDefault()?.Name;
-                                        <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
+                                                <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
                 }
             </MudSelect>
 
@@ -59,8 +65,8 @@
 
 @code {
     private MenuItem menuItem = new MenuItem();
-    private IBrowserFile file;
-    private string imageData;
+    private IBrowserFile? file;
+    private string? imageData;
 
     [Parameter]
     public string Id { get; set; }
@@ -99,7 +105,7 @@
         }
         catch
         {
-            Snackbar.Add("Слишком большой вес изображения!");    
+            Snackbar.Add("Слишком большой вес изображения!");
         }
     }
 

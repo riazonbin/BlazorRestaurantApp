@@ -28,6 +28,33 @@ namespace BlazorRestaurantApp.Services
             var collection = _database.GetCollection<Employee>("EmployeesCollection");
             collection.InsertOneAsync(user);
         }
+
+        public async void AddDefaultManagerToDataBase()
+        {
+            Employee manager = new Employee()
+            {
+                Email = "RZrestaurant@gmail.com",
+                Firstname = "Default",
+                Lastname = "Restaurant",
+                Patronymic = "Manager",
+                Password = "qwerty1234",
+                Role = Enums.UserRoles.Employee
+            };
+            var collection = _database.GetCollection<Employee>("EmployeesCollection");
+            await collection.InsertOneAsync(manager);
+        }
+
+        public bool IsDefaultManagerExists()
+        {
+            var collection = _database.GetCollection<Employee>("EmployeesCollection");
+            var result = collection.Find(x => x.Email == "RZrestaurant@gmail.com").FirstOrDefault();
+            if(result is null)
+            {
+                return false;
+            }
+            return true;
+        }
+
         #endregion
 
         #region AddingMenuItemsToDatabase

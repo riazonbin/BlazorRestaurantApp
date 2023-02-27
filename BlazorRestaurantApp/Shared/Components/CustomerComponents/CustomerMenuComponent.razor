@@ -1,0 +1,91 @@
+﻿@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Enums;
+@using BlazorRestaurantApp.Services;
+@using MongoDB.Bson;
+@using System.ComponentModel.DataAnnotations;
+@inject MongoConnection mongoConnection
+@inject FileSystemService fileSystemService
+@inject NavigationManager navigationManager
+
+<MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@(selectedDishTypeFilter)" Direction="Direction.Right" SelectedValuesChanged="@FilterMenuItems">
+    @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
+    {
+        var valueName = typeof(DishTypes).GetMember(typeOfDish.ToString())[0]
+        .GetCustomAttributes(typeof(DisplayAttribute), false)
+        .OfType<DisplayAttribute>()
+        .FirstOrDefault()?.Name;
+            <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
+    }
+</MudSelect>
+
+<br />
+<MudDivider></MudDivider>
+
+<MudGrid Spacing="5"> 
+    @foreach (var menuItem in menuItems)
+    {
+        string imageData = "";
+        if (menuItem.ImageId != ObjectId.Empty)
+        {
+            imageData = GetImageSource(menuItem.ImageId);
+        }
+        <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudCard Style="min-height:550px; min-width: 250px;">
+                <MudCardMedia Image="@imageData"/>
+                <MudCardContent>
+                    <h3>@menuItem.Name</h3>
+                    <p>@menuItem.Description</p>
+                    <h4>@menuItem.Price.ToString("C")</h4>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary">Добавить в корзину</MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+
+</MudGrid>
+
+@code {
+    private DishTypes selectedDishTypeFilter = DishTypes.None;
+
+    private List<MenuItem> menuItems = new List<MenuItem>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        menuItems = await mongoConnection.GetAllMenuItems();
+        await base.OnInitializedAsync();
+    }
+
+    void FilterMenuItems()
+    {
+        ResetFilter();
+        if (selectedDishTypeFilter == DishTypes.None)
+        {
+            return;
+        }
+        menuItems = menuItems.Where(x => x.DishType == selectedDishTypeFilter).ToList();
+        StateHasChanged();
+    }
+
+    async void ResetFilter()
+    {
+        menuItems = await mongoConnection.GetAllMenuItems();
+    }
+
+    private string GetImageSource(ObjectId imageId)
+    {
+        try
+        {
+            if (imageId != ObjectId.Empty)
+            {
+                var imageData = fileSystemService.DownloadItemFromDbByIdAsBytes(imageId);
+
+                var base64Image = Convert.ToBase64String(imageData);
+
+                return $"data:image/png;base64,{base64Image}";
+            }
+            return "";
+        }
+        catch { return ""; }
+
+    }
+}
