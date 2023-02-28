@@ -7,16 +7,27 @@
 @inject FileSystemService fileSystemService
 @inject NavigationManager navigationManager
 
-<MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@(selectedDishTypeFilter)" Direction="Direction.Right" SelectedValuesChanged="@FilterMenuItems">
-    @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
-    {
-        var valueName = typeof(DishTypes).GetMember(typeOfDish.ToString())[0]
-        .GetCustomAttributes(typeof(DisplayAttribute), false)
-        .OfType<DisplayAttribute>()
-        .FirstOrDefault()?.Name;
-            <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
-    }
-</MudSelect>
+<MudExpansionPanels>
+    <MudExpansionPanel Text="Фильтр">
+        <MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@(selectedDishTypeFilter)" Direction="Direction.Right" SelectedValuesChanged="@FilterMenuItems">
+            @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
+            {
+                var valueName = typeof(DishTypes).GetMember(typeOfDish.ToString())[0]
+                .GetCustomAttributes(typeof(DisplayAttribute), false)
+                .OfType<DisplayAttribute>()
+                .FirstOrDefault()?.Name;
+                    <MudSelectItem Value="@typeOfDish">@valueName</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudTextField T="string" Label="Наименование блюда" @bind-Value="@selectedDishNameFilter" TextChanged="@FilterMenuItems"></MudTextField>
+
+        <br />
+
+        <MudButton Variant="Variant.Filled" OnClick="ResetAllFilters">Сбросить фильтр</MudButton>
+
+    </MudExpansionPanel>
+</MudExpansionPanels>
 
 <br />
 <MudDivider></MudDivider>
@@ -46,6 +57,7 @@
 
 @code {
     private DishTypes selectedDishTypeFilter = DishTypes.None;
+    private string selectedDishNameFilter = "";
 
     private List<MenuItem> menuItems = new List<MenuItem>();
 
@@ -58,16 +70,38 @@
     void FilterMenuItems()
     {
         ResetFilter();
-        if (selectedDishTypeFilter == DishTypes.None)
+        if (selectedDishTypeFilter == DishTypes.None && selectedDishNameFilter == "")
         {
             return;
         }
-        menuItems = menuItems.Where(x => x.DishType == selectedDishTypeFilter).ToList();
+
+        if (selectedDishTypeFilter == DishTypes.None)
+        {
+            menuItems = menuItems.Where(x => x.Name.Contains(selectedDishNameFilter)).ToList();
+        }
+        else if (selectedDishNameFilter == "")
+        {
+            menuItems = menuItems.Where(x => x.DishType == selectedDishTypeFilter).ToList();
+        }
+        else
+        {
+            menuItems = menuItems.Where(x => x.Name.Contains(selectedDishNameFilter)).ToList();
+            menuItems = menuItems.Where(x => x.DishType == selectedDishTypeFilter).ToList();
+        }
+
         StateHasChanged();
     }
 
     async void ResetFilter()
     {
+        menuItems = await mongoConnection.GetAllMenuItems();
+    }
+
+    async void ResetAllFilters()
+    {
+        selectedDishNameFilter = "";
+        selectedDishTypeFilter = DishTypes.None;
+
         menuItems = await mongoConnection.GetAllMenuItems();
     }
 
