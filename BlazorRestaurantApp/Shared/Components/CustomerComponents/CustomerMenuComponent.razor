@@ -112,7 +112,7 @@
     async Task AddItemToCart(MenuItem menuItem)
     {
         var currentUserCart = await mongoConnection.GetUserCart(userService.currentUser.Id);
-        await mongoConnection.AddItemToUserCart(currentUserCart, menuItem);
+        mongoConnection.AddItemToUserCart(currentUserCart, menuItem);
         Snackbar.Add("Блюдо добавлено в корзину", Severity.Info);
     }
 

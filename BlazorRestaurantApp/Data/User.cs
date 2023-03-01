@@ -8,7 +8,8 @@ namespace BlazorRestaurantApp.Data
     public class User
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
         [Required]
         public string Lastname { get; set; }

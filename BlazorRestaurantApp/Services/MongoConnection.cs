@@ -83,25 +83,29 @@ namespace BlazorRestaurantApp.Services
 
         #region CartRegopn
 
-        public async Task<Cart> GetUserCart(ObjectId userId)
+        public async Task<Cart> GetUserCart(string userId)
         {
+            ObjectId objectUserId = ObjectId.Parse(userId);
+
             var collection = _database.GetCollection<Cart>("CartsCollection");
-            var cart = await collection.FindAsync(x => x.UserId == userId).Result.FirstOrDefaultAsync();
+            var cart = await collection.FindAsync(x => x.UserId == objectUserId).Result.FirstOrDefaultAsync();
             return cart;
         }
 
-        public async Task CreateUserCart(ObjectId userId)
+        public async Task CreateUserCart(string userId)
         {
+            ObjectId objectUserId = ObjectId.Parse(userId);
+
             var collection = _database.GetCollection<Cart>("CartsCollection");
             var cart = new Cart()
             {
                 Items= new List<CartItem>(),
-                UserId = userId
+                UserId = objectUserId
             };
             await collection.InsertOneAsync(cart);
         }
 
-        public async Task AddItemToUserCart(Cart userCart, MenuItem menuItem)
+        public void AddItemToUserCart(Cart userCart, MenuItem menuItem)
         {
             var collection = _database.GetCollection<Cart>("CartsCollection");
 
@@ -119,6 +123,42 @@ namespace BlazorRestaurantApp.Services
                     Quantity = 1
                 };
                 userCart.Items.Add(cartItem);
+            }
+
+            collection.ReplaceOne(x => x.Id == userCart.Id, userCart);
+        }
+
+        public void DeleteItemFromUserCart(Cart userCart, MenuItem menuItem)
+        {
+            var collection = _database.GetCollection<Cart>("CartsCollection");
+
+            var cartItem = userCart.Items.FirstOrDefault(x => x.MenuItem.Id == menuItem.Id);
+
+            if (cartItem is not null)
+            {
+                userCart.Items.Remove(cartItem);
+            }
+
+            collection.ReplaceOne(x => x.Id == userCart.Id, userCart);
+        }
+
+        public void LowerCountOfItemInUserCart(Cart userCart, MenuItem menuItem)
+        {
+            var collection = _database.GetCollection<Cart>("CartsCollection");
+
+            var cartItem = userCart.Items.FirstOrDefault(x => x.MenuItem.Id == menuItem.Id);
+
+            if (cartItem is not null)
+            {
+                if(cartItem.Quantity > 1)
+                {
+                    cartItem.Quantity--;
+                }
+                else
+                {
+                    userCart.Items.Remove(cartItem);
+                }
+
             }
 
             collection.ReplaceOne(x => x.Id == userCart.Id, userCart);

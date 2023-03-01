@@ -28,25 +28,25 @@
                 <MudTh>Действия</MudTh>
             </HeaderContent>
             <RowTemplate>
-                @foreach(var item in currentCart.Items)
-                {
-                <MudTd>@item.MenuItem.Name</MudTd>
-                <MudTd>@item.Quantity</MudTd>
-                <MudTd>@item.MenuItem.Price.ToString("C")</MudTd>
-                <MudTd>
-                    <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+                <MudTd DataLabel="Блюдо">@context.MenuItem.Name</MudTd>
+                <MudTd DataLabel="Количество">@context.Quantity</MudTd>
+                <MudTd DataLabel="Стоимость">@context.MenuItem.Price</MudTd>
+                <MudTd DataLabel="Действия">
+                    <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small" 
+                    OnClick="(() => AddItemCount(context.MenuItem))">
                         +1
                     </MudButton>
 
-                    <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small">
+                    <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small"
+                    OnClick="(() => LowerItemCount(context.MenuItem))">
                         -1
                     </MudButton>
 
-                    <MudButton Icon="Icons.Outlined.Remove" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small">
+                    <MudButton Icon="Icons.Outlined.Remove" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                    OnClick="(() => DeleteItemFromCart(context.MenuItem))">
                         Удалить
                     </MudButton>
                 </MudTd>
-                }
             </RowTemplate>
         </MudTable>
 
@@ -64,6 +64,24 @@
     protected override async Task OnInitializedAsync()
     {
         await CheckForUserCart();
+    }
+
+    void AddItemCount(MenuItem menuItem)
+    {
+        mongoConnection.AddItemToUserCart(currentCart, menuItem);
+        StateHasChanged();
+    }
+
+    void LowerItemCount(MenuItem menuItem)
+    {
+        mongoConnection.LowerCountOfItemInUserCart(currentCart, menuItem);
+        StateHasChanged();
+    }
+    
+    void DeleteItemFromCart(MenuItem menuItem)
+    {
+        mongoConnection.DeleteItemFromUserCart(currentCart, menuItem);
+        StateHasChanged();
     }
 
     async Task CheckForUserCart()
