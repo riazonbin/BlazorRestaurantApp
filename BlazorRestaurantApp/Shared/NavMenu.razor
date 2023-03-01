@@ -1,9 +1,30 @@
-﻿<MudNavMenu Class="mud-height-full" Style="background-color:white">
+﻿@using BlazorRestaurantApp.Data;
+@using BlazorRestaurantApp.Services;
+@inject UserService userService
+
+<MudNavMenu Class="mud-height-full" Style="background-color:white">
     <MudDivider Class="my-2" />
+    @if(isLoadingNavMenu)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+        return;
+    }
+
+    @if (userService.currentUser is null)
+    {
+        <MudNavLink Href="/regPage" Icon="@Icons.Material.Filled.HowToReg">Регистрация</MudNavLink>
+        <MudNavLink Href="/authorizationPage" Icon="@Icons.Material.Filled.SwitchAccount">Авторизация</MudNavLink>
+        return;
+    }
+
     <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
-    <MudNavLink Href="/regPage" Icon="@Icons.Material.Filled.HowToReg">Регистрация</MudNavLink>
-    <MudNavLink Href="/authorizationPage" Icon="@Icons.Material.Filled.SwitchAccount">Авторизация</MudNavLink>
     <MudNavLink Href="/menu" Icon="@Icons.Material.Filled.Menu">Меню</MudNavLink>
+
+    @if (userService.currentUser.Role == Enums.UserRoles.Customer)
+    {
+            <MudNavLink Href="/cart" Icon="@Icons.Material.Filled.ShoppingCart">Корзина</MudNavLink>
+    }
+
 </MudNavMenu>
 
 
@@ -34,6 +55,20 @@
 
 @code {
     private bool collapseNavMenu = true;
+    bool isLoadingNavMenu = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        isLoadingNavMenu = true;
+        return base.OnInitializedAsync();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        StateHasChanged();
+        isLoadingNavMenu = false;
+    }
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 

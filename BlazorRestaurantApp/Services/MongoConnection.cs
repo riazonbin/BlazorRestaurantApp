@@ -8,10 +8,12 @@ namespace BlazorRestaurantApp.Services
     public class MongoConnection
     {
         IMongoDatabase _database;
+        string _defaultConnectionString = "mongodb://localhost";
+        string _cloudConnectionString = "mongodb+srv://riazonbin:Herofortress1@cluster0.faf99uw.mongodb.net/?retryWrites=true&w=majority";
 
         public MongoConnection()
         {
-            var client = new MongoClient("mongodb://localhost");
+            var client = new MongoClient(_defaultConnectionString);
             _database = client.GetDatabase("RestaurantApp");
         }
 
@@ -77,6 +79,51 @@ namespace BlazorRestaurantApp.Services
             var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
             return await (await collection.FindAsync(new BsonDocument())).ToListAsync();
         }
+        #endregion
+
+        #region CartRegopn
+
+        public async Task<Cart> GetUserCart(ObjectId userId)
+        {
+            var collection = _database.GetCollection<Cart>("CartsCollection");
+            var cart = await collection.FindAsync(x => x.UserId == userId).Result.FirstOrDefaultAsync();
+            return cart;
+        }
+
+        public async Task CreateUserCart(ObjectId userId)
+        {
+            var collection = _database.GetCollection<Cart>("CartsCollection");
+            var cart = new Cart()
+            {
+                Items= new List<CartItem>(),
+                UserId = userId
+            };
+            await collection.InsertOneAsync(cart);
+        }
+
+        public async Task AddItemToUserCart(Cart userCart, MenuItem menuItem)
+        {
+            var collection = _database.GetCollection<Cart>("CartsCollection");
+
+            var cartItem = userCart.Items.Where(x => x.MenuItem.Id == menuItem.Id).FirstOrDefault();
+
+            if (cartItem is not null)
+            {
+                cartItem.Quantity++;
+            }
+            else
+            {
+                cartItem = new CartItem()
+                {
+                    MenuItem = menuItem,
+                    Quantity = 1
+                };
+                userCart.Items.Add(cartItem);
+            }
+
+            collection.ReplaceOne(x => x.Id == userCart.Id, userCart);
+        }
+
         #endregion
 
         #region FindUser

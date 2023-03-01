@@ -1,0 +1,77 @@
+﻿@page "/cart"
+@using BlazorRestaurantApp.Data
+@using BlazorRestaurantApp.Services;
+@using MongoDB.Bson;
+@inject MongoConnection mongoConnection
+@inject UserService userService
+@inject ILocalStorageService localStorageService;
+
+@if(userService.currentUser is null)
+{
+    return;
+}
+
+
+<MudContainer>
+
+    @if (currentCart.Items.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info">Ваша корзина пуста.</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="currentCart.Items" Dense="true" Outlined="true" ContainerClass="mt-4">
+            <HeaderContent>
+                <MudTh>Блюдо</MudTh>
+                <MudTh>Количество</MudTh>
+                <MudTh>Стоимость</MudTh>
+                <MudTh>Действия</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                @foreach(var item in currentCart.Items)
+                {
+                <MudTd>@item.MenuItem.Name</MudTd>
+                <MudTd>@item.Quantity</MudTd>
+                <MudTd>@item.MenuItem.Price.ToString("C")</MudTd>
+                <MudTd>
+                    <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+                        +1
+                    </MudButton>
+
+                    <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small">
+                        -1
+                    </MudButton>
+
+                    <MudButton Icon="Icons.Outlined.Remove" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small">
+                        Удалить
+                    </MudButton>
+                </MudTd>
+                }
+            </RowTemplate>
+        </MudTable>
+
+        <MudDivider />
+
+        <MudText Typo="Typo.h5" Class="mt-4">Итого: @currentCart.Items.Sum(i => i.MenuItem.Price * i.Quantity).ToString("C")</MudText>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Оплатить заказ</MudButton>
+    }
+</MudContainer>
+
+@code {
+    private Cart currentCart = new Cart();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckForUserCart();
+    }
+
+    async Task CheckForUserCart()
+    {
+        if(userService.currentUser is null)
+        {
+            return;
+        }
+        currentCart = await mongoConnection.GetUserCart(userService.currentUser.Id);
+    }
+}

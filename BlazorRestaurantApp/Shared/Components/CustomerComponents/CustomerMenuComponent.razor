@@ -6,6 +6,8 @@
 @inject MongoConnection mongoConnection
 @inject FileSystemService fileSystemService
 @inject NavigationManager navigationManager
+@inject UserService userService
+@inject ISnackbar Snackbar;
 
 <MudExpansionPanels>
     <MudExpansionPanel Text="Фильтр">
@@ -47,7 +49,7 @@
                     <h3>@menuItem.Name</h3>
                     <p>@menuItem.Description</p>
                     <h4>@menuItem.Price.ToString("C")</h4>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary">Добавить в корзину</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => AddItemToCart(menuItem))">Добавить в корзину</MudButton>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -64,6 +66,7 @@
     protected async override Task OnInitializedAsync()
     {
         menuItems = await mongoConnection.GetAllMenuItems();
+        await CheckForUserCart();
         await base.OnInitializedAsync();
     }
 
@@ -95,6 +98,22 @@
     async void ResetFilter()
     {
         menuItems = await mongoConnection.GetAllMenuItems();
+    }
+
+    async Task CheckForUserCart()
+    {
+        var currentUserCart = await mongoConnection.GetUserCart(userService.currentUser.Id);
+        if(currentUserCart is null)
+        {
+            await mongoConnection.CreateUserCart(userService.currentUser.Id);
+        }
+    }
+
+    async Task AddItemToCart(MenuItem menuItem)
+    {
+        var currentUserCart = await mongoConnection.GetUserCart(userService.currentUser.Id);
+        await mongoConnection.AddItemToUserCart(currentUserCart, menuItem);
+        Snackbar.Add("Блюдо добавлено в корзину", Severity.Info);
     }
 
     async void ResetAllFilters()

@@ -4,6 +4,7 @@
 @inject ILocalStorageService localStorageService;
 @inject UserService userService;
 @inject MongoConnection mongoConnection;
+@inject NavigationManager navigationManager;
 @inherits LayoutComponentBase
 
 <PageTitle>Ресторан</PageTitle>
@@ -23,6 +24,7 @@
         <MudSpacer />
         @if(userService.currentUser is not null)
         {
+            <a @onclick="@LogOut">Выйти</a>
             <a href="/personalPage">
                 <MudIconButton Edge="Edge.End">
                     <MudAvatar Color="Color.Secondary">@userService.currentUser?.Firstname[0]</MudAvatar>
@@ -55,6 +57,15 @@
         {
             mongoConnection.AddDefaultManagerToDataBase();
         }
+    }
+
+    void LogOut()
+    {
+        userService.currentUser = null;
+
+        localStorageService.RemoveAsync("CurrentUser");
+
+        navigationManager.NavigateTo("/");
     }
 
     private bool _drawerOpen = true;

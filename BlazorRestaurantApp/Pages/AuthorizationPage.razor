@@ -7,6 +7,7 @@
 @inject IDialogService DialogService
 @inject NavigationManager navManager;
 @inject ILocalStorageService localStorageService;
+@inject UserService userService;
 
 @page "/authorizationPage"
 
@@ -40,7 +41,7 @@
 
     bool isCorrectAuthorizationUser = true;
 
-    private void OnValidSubmit()
+    private async Task OnValidSubmit()
     {
         isCorrectAuthorizationUser = true;
         User? foundedUser;
@@ -52,15 +53,17 @@
         }
         else
         {
-            localStorageService.SetAsync<User>("CurrentUser", foundedUser);
+            userService.currentUser = foundedUser;
+            await localStorageService.SetAsync<User>("CurrentUser", foundedUser);
             if(foundedUser.Role == UserRoles.Customer)
             {
-                navManager.NavigateTo("/customerManagementPage");
+                navManager.NavigateTo("/menu");
             }
             else
             {
-                navManager.NavigateTo("/employeeManagementPage");
+                navManager.NavigateTo("/menu");
             }
+            StateHasChanged();
         }
 
     }
