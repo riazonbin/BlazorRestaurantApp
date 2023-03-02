@@ -20,7 +20,8 @@
         <MudForm>
             <MudTextField @bind-Value="menuItem.Name" Label="Наименование" />
             <MudTextField @bind-Value="menuItem.Description" Label="Описание" />
-            <MudTextField @bind-Value="menuItem.Price" Label="Стоимость" />
+            <MudNumericField @bind-Value="menuItem.Price" Label="Стоимость" Variant="Variant.Text" Min="0" For="(() => menuItem.Price)"/>
+            <MudNumericField @bind-Value="menuItem.Weight" Label="Вес" Variant="Variant.Text" Min="0" For="(() => menuItem.Weight)"/>
             <MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@menuItem.DishType">
                 @foreach (DishTypes typeOfDish in Enum.GetValues(typeof(DishTypes)).Cast<DishTypes>())
                 {

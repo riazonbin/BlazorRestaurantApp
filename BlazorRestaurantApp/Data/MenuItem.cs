@@ -23,5 +23,8 @@ namespace BlazorRestaurantApp.Data
 
         [Required]
         public DishTypes DishType { get; set; }
+
+        [Required]
+        public int Weight { get; set; }
     }
 }

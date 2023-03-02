@@ -48,7 +48,7 @@
                 <MudCardContent>
                     <h3>@menuItem.Name</h3>
                     <p>@menuItem.Description</p>
-                    <h4>@menuItem.Price.ToString("C")</h4>
+                    <h4>@menuItem.Price.ToString("C") / @menuItem.Weight грамм</h4>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => AddItemToCart(menuItem))">Добавить в корзину</MudButton>
                 </MudCardContent>
             </MudCard>
