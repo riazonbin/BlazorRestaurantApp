@@ -10,10 +10,13 @@ namespace BlazorRestaurantApp.Services
     {
         private readonly ILogger<FileSystemService> _logger;
         private readonly GridFSBucket _gridFS;
+
+        string _defaultConnectionString = "mongodb://localhost";
+
         public FileSystemService(ILogger<FileSystemService> logger)
         {
             _logger = logger;
-            var client = new MongoClient("mongodb://localhost");
+            var client = new MongoClient(_defaultConnectionString);
             var database = client.GetDatabase("RestaurantApp");
             _gridFS = new GridFSBucket(database);
         }

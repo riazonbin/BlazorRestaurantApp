@@ -9,7 +9,6 @@ namespace BlazorRestaurantApp.Services
     {
         IMongoDatabase _database;
         string _defaultConnectionString = "mongodb://localhost";
-        string _cloudConnectionString = "mongodb+srv://riazonbin:Herofortress1@cluster0.faf99uw.mongodb.net/?retryWrites=true&w=majority";
 
         public MongoConnection()
         {
