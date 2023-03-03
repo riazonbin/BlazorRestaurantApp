@@ -49,7 +49,7 @@ namespace BlazorRestaurantApp.Services
         {
             var collection = _database.GetCollection<Employee>("EmployeesCollection");
             var result = collection.Find(x => x.Email == "RZrestaurant@gmail.com").FirstOrDefault();
-            if(result is null)
+            if (result is null)
             {
                 return false;
             }
@@ -76,7 +76,11 @@ namespace BlazorRestaurantApp.Services
         public async Task<List<MenuItem>> GetAllMenuItems()
         {
             var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
-            return await (await collection.FindAsync(new BsonDocument())).ToListAsync();
+
+            var sort = Builders<MenuItem>.Sort.Ascending("DishType");
+            var options = new FindOptions<MenuItem>() { Sort = sort };
+
+            return await (await collection.FindAsync(new BsonDocument(), options)).ToListAsync();
         }
         #endregion
 
@@ -98,7 +102,7 @@ namespace BlazorRestaurantApp.Services
             var collection = _database.GetCollection<Cart>("CartsCollection");
             var cart = new Cart()
             {
-                Items= new List<CartItem>(),
+                Items = new List<CartItem>(),
                 UserId = objectUserId
             };
             await collection.InsertOneAsync(cart);
@@ -149,7 +153,7 @@ namespace BlazorRestaurantApp.Services
 
             if (cartItem is not null)
             {
-                if(cartItem.Quantity > 1)
+                if (cartItem.Quantity > 1)
                 {
                     cartItem.Quantity--;
                 }
@@ -169,14 +173,14 @@ namespace BlazorRestaurantApp.Services
 
         public User? FindUserByEmail(string email)
         {
-            var findedCustomer =  FindCustomerByEmail(email);
-            var findedEmployee =  FindEmployeeByEmail(email);
+            var findedCustomer = FindCustomerByEmail(email);
+            var findedEmployee = FindEmployeeByEmail(email);
 
-            if(findedCustomer != null)
+            if (findedCustomer != null)
             {
                 return findedCustomer;
             }
-            else if(findedEmployee != null) 
+            else if (findedEmployee != null)
             {
                 return findedEmployee;
             }
@@ -184,7 +188,7 @@ namespace BlazorRestaurantApp.Services
             return null;
         }
 
-        public  Customer FindCustomerByEmail (string email)
+        public Customer FindCustomerByEmail(string email)
         {
             var filter = Builders<Customer>.Filter.Eq("Email", email);
             var collection = _database.GetCollection<Customer>("CustomersCollection");

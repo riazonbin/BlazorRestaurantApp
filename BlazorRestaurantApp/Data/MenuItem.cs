@@ -16,7 +16,6 @@ namespace BlazorRestaurantApp.Data
         public string Description { get; set; }
 
         [Required]
-        [RegularExpression("^[0-9]*$")]
         public decimal Price { get; set; }
 
         public ObjectId ImageId { get; set; }

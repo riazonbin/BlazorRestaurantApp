@@ -23,14 +23,16 @@
         <MudTable Items="currentCart.Items" Dense="true" Outlined="true" ContainerClass="mt-4">
             <HeaderContent>
                 <MudTh>Блюдо</MudTh>
+                <MudTh>Стоимость за единицу</MudTh>
                 <MudTh>Количество</MudTh>
-                <MudTh>Стоимость</MudTh>
+                <MudTh>Общая стоимость</MudTh>
                 <MudTh>Действия</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Блюдо">@context.MenuItem.Name</MudTd>
+                <MudTd DataLabel="Стоимость за единицу">@context.MenuItem.Price.ToString("C")</MudTd>
                 <MudTd DataLabel="Количество">@context.Quantity</MudTd>
-                <MudTd DataLabel="Стоимость">@context.MenuItem.Price</MudTd>
+                <MudTd DataLabel="Общая стоимость">@((context.MenuItem.Price * context.Quantity).ToString("C"))</MudTd>
                 <MudTd DataLabel="Действия">
                     <MudButton Icon="Icons.Outlined" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small" 
                     OnClick="(() => AddItemCount(context.MenuItem))">

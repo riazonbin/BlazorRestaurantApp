@@ -80,7 +80,7 @@
 
         if (selectedDishTypeFilter == DishTypes.None)
         {
-            menuItems = menuItems.Where(x => x.Name.Contains(selectedDishNameFilter)).ToList();
+            menuItems = menuItems.Where(x => x.Name.ToLower().Contains(selectedDishNameFilter.ToLower())).ToList();
         }
         else if (selectedDishNameFilter == "")
         {
@@ -88,7 +88,7 @@
         }
         else
         {
-            menuItems = menuItems.Where(x => x.Name.Contains(selectedDishNameFilter)).ToList();
+            menuItems = menuItems.Where(x => x.Name.ToLower().Contains(selectedDishNameFilter.ToLower())).ToList();
             menuItems = menuItems.Where(x => x.DishType == selectedDishTypeFilter).ToList();
         }
 

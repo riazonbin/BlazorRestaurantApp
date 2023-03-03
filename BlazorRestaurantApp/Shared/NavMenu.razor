@@ -6,7 +6,7 @@
     <MudDivider Class="my-2" />
     @if(isLoadingNavMenu)
     {
-        <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+        <MudProgressLinear Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
         return;
     }
 
@@ -17,7 +17,7 @@
         return;
     }
 
-    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
+    <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
     <MudNavLink Href="/menu" Icon="@Icons.Material.Filled.Menu">Меню</MudNavLink>
 
     @if (userService.currentUser.Role == Enums.UserRoles.Customer)

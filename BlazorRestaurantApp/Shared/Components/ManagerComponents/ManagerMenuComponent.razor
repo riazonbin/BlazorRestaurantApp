@@ -52,12 +52,15 @@
                 </MudCard>
             </MudItem>
     }
-    <MudScrollToTop Visible="true" TopOffset="0">
-        <MudFab Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Add" />
-    </MudScrollToTop>
+
+    <div onclick="@(() => NavigateToAddNewItem())">
+        <MudScrollToTop Visible="true" TopOffset="0">
+            <MudFab Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Add"/>
+        </MudScrollToTop>
+    </div>
+
 </MudGrid>
 <br /><br />
-<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => NavigateToAddNewItem())">Добавить</MudButton>
 
 @code {
     private DishTypes selectedDishTypeFilter = DishTypes.None;
