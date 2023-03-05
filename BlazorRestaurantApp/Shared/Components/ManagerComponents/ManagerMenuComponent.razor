@@ -20,7 +20,7 @@
             }
         </MudSelect>
 
-        <MudTextField T="string" Label="Наименование блюда" @bind-Value="@selectedDishNameFilter" TextChanged="@FilterMenuItems"></MudTextField>
+        <MudTextField T="string" Label="Наименование блюда" @bind-Value="@selectedDishNameFilter" Immediate TextChanged="@FilterMenuItems"></MudTextField>
 
         <br />
 

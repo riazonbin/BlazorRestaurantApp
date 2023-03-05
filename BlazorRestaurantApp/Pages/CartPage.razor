@@ -14,7 +14,7 @@
 
 <MudContainer>
 
-    @if (currentCart.Items.Count == 0)
+    @if (currentCart.Items.Count == 0 || currentCart is null)
     {
         <MudAlert Severity="Severity.Info">Ваша корзина пуста.</MudAlert>
     }
@@ -56,12 +56,20 @@
 
         <MudText Typo="Typo.h5" Class="mt-4">Итого: @currentCart.Items.Sum(i => i.MenuItem.Price * i.Quantity).ToString("C")</MudText>
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Оплатить заказ</MudButton>
+        <br />
+
+            <MudNumericField T="int" @bind-Value="tableNumber" Min="1" Max="40" Label="Номер стола" Error="@(!IsTableAvailable().Result)" ErrorText="Столик занят" Clearable 
+            Style="width: 20%" HelperText="1-40"></MudNumericField>
+        
+        <br />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async => AddOrder())" Class="mt-4">Оплатить заказ</MudButton>
     }
 </MudContainer>
 
 @code {
     private Cart currentCart = new Cart();
+    private int tableNumber = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,7 +87,7 @@
         mongoConnection.LowerCountOfItemInUserCart(currentCart, menuItem);
         StateHasChanged();
     }
-    
+
     void DeleteItemFromCart(MenuItem menuItem)
     {
         mongoConnection.DeleteItemFromUserCart(currentCart, menuItem);
@@ -93,5 +101,19 @@
             return;
         }
         currentCart = await mongoConnection.GetUserCart(userService.currentUser.Id);
+    }
+
+    async Task AddOrder()
+    {
+        await mongoConnection.AddOrder(currentCart, tableNumber);
+    }
+
+    async Task<bool> IsTableAvailable()
+    {
+        if(await mongoConnection.IsTableAvailable(tableNumber, userService.currentUser.Id))
+        {
+            return true;
+        }
+        return false;
     }
 }

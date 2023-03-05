@@ -2,6 +2,7 @@
 using DnsClient;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using static MongoDB.Driver.WriteConcern;
 
 namespace BlazorRestaurantApp.Services
 {
@@ -84,26 +85,24 @@ namespace BlazorRestaurantApp.Services
         }
         #endregion
 
-        #region CartRegopn
+        #region CartRegion
 
         public async Task<Cart> GetUserCart(string userId)
         {
-            ObjectId objectUserId = ObjectId.Parse(userId);
 
             var collection = _database.GetCollection<Cart>("CartsCollection");
-            var cart = await collection.FindAsync(x => x.UserId == objectUserId).Result.FirstOrDefaultAsync();
+            var cart = await collection.FindAsync(x => x.UserId == userId).Result.FirstOrDefaultAsync();
             return cart;
         }
 
         public async Task CreateUserCart(string userId)
         {
-            ObjectId objectUserId = ObjectId.Parse(userId);
 
             var collection = _database.GetCollection<Cart>("CartsCollection");
             var cart = new Cart()
             {
                 Items = new List<CartItem>(),
-                UserId = objectUserId
+                UserId = userId
             };
             await collection.InsertOneAsync(cart);
         }
@@ -145,6 +144,15 @@ namespace BlazorRestaurantApp.Services
             collection.ReplaceOne(x => x.Id == userCart.Id, userCart);
         }
 
+        public async Task ClearUserCart(Cart userCart)
+        {
+            var collection = _database.GetCollection<Cart>("CartsCollection");
+
+            userCart.Items = new List<CartItem>();
+
+            await collection.ReplaceOneAsync(x => x.Id == userCart.Id, userCart);
+        }
+
         public void LowerCountOfItemInUserCart(Cart userCart, MenuItem menuItem)
         {
             var collection = _database.GetCollection<Cart>("CartsCollection");
@@ -165,6 +173,132 @@ namespace BlazorRestaurantApp.Services
             }
 
             collection.ReplaceOne(x => x.Id == userCart.Id, userCart);
+        }
+
+        #endregion
+
+
+        #region TableRegion
+        public async Task<bool> IsTableAvailable(int tableNumber, string userId)
+        {
+            var collection = _database.GetCollection<Table>("TablesCollection");
+            var table = collection.Find(x => x.TableNumber == tableNumber).FirstOrDefault();
+
+            var reservationsOnTable = await GetReservationsByTableId(table.Id);
+
+            var query = reservationsOnTable
+                .Where(x => x.StartTimeOfReservation <= DateTime.Now
+                && x.EndTimeOfReservation >= DateTime.Now
+                && x.ReservedCustomerId != userId
+                || x.StartTimeOfReservation.Subtract(DateTime.Now).Hours <= 3
+                && x.ReservedCustomerId != userId).ToList();
+
+            if (query is null || query.Count == 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task GenerateTables()
+        {
+            var collection = _database.GetCollection<Table>("TablesCollection");
+            for(int i = 0; i < 40; ++i)
+            {
+                var table = new Table()
+                {
+                    TableNumber= i + 1,
+                };
+                await collection.InsertOneAsync(table);
+            }
+        }
+
+        public async Task<bool> IsCustomerHasSoonReservationsOnTable(string customerId, string tableId) 
+        {
+            var reservationsOnTable = await GetReservationsByTableId(tableId);
+
+            if (reservationsOnTable
+                            .Where(x => x.StartTimeOfReservation <= DateTime.Now
+                           && x.EndTimeOfReservation >= DateTime.Now
+                           && x.ReservedCustomerId == customerId) is not null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<Table> GetTableByNumber(int tableNumber)
+        {
+            var collection = _database.GetCollection<Table>("TablesCollection");
+            return await collection.FindAsync(x => x.TableNumber == tableNumber).Result.FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Reservation>> GetReservationsByTableId(string tableId)
+        {
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            return await collection.FindAsync(x => x.TableId == tableId).Result.ToListAsync();
+        }
+
+        public async Task<List<Reservation>> GetReservationsByTableNumber(int tableNumber)
+        {
+            var table = await GetTableByNumber(tableNumber);
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            return await collection.FindAsync(x => x.Id == table.Id).Result.ToListAsync();
+        }
+
+        public async Task ReserveTable(int tableNumber, string userId, DateTime? timeOfReservation)
+        {
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            var table = await GetTableByNumber(tableNumber);
+
+            Reservation reservation;
+            if (timeOfReservation is null)
+            {
+                reservation = new Reservation(DateTime.Now)
+                {
+                    ReservedCustomerId = userId,
+                    TableId = table.Id
+                };
+            }
+            else
+            {
+                reservation = new Reservation(DateTime.Now)
+                {
+                    ReservedCustomerId = userId,
+                    TableId = table.Id
+                };
+            }
+            await collection.InsertOneAsync(reservation);
+        }
+        #endregion
+
+        #region OrderRegion
+
+        public async Task AddOrder(Cart userCart, int tableNumber)
+        {
+            var table = await GetTableByNumber(tableNumber);
+
+            if (!await IsCustomerHasSoonReservationsOnTable(userCart.UserId, table.Id))
+            {
+                await ReserveTable(tableNumber, userCart.UserId, DateTime.Now);
+            }
+
+            Order order = new Order()
+            {
+                CartItems = userCart.Items,
+                CustomerId = userCart.UserId,
+                OrderStartTime = DateTime.Now,
+                TableId = table.Id
+            };
+
+            var collection = _database.GetCollection<Order>("OrdersCollection");
+
+            await collection.InsertOneAsync(order);
+
+            await ClearUserCart(userCart);
+
         }
 
         #endregion

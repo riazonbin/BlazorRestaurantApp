@@ -10,20 +10,20 @@ namespace BlazorRestaurantApp.Data
         [BsonId]
         public ObjectId Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Название блюда должно быть заполнено!")]
         public string Name { get; set; }
 
         public string Description { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Цена блюда должно быть заполнена!")]
         public decimal Price { get; set; }
 
         public ObjectId ImageId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Тип блюда должен быть указан!")]
         public DishTypes DishType { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Вес блюда должно быть указан!")]
         public int Weight { get; set; }
     }
 }

@@ -9,7 +9,5 @@ namespace BlazorRestaurantApp.Data
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public int TableNumber { get; set; }
-
-        public Reservation TableReservation { get; set; }
     }
 }

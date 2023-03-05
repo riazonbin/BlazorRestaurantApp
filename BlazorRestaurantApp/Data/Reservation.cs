@@ -11,13 +11,18 @@ namespace BlazorRestaurantApp.Data
 
         public string ReservedCustomerId { get; set; }
 
-        public DateTime TimeOfReservation { get; set; }
+        public string TableId { get; set; }
 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
+        public DateTime StartTimeOfReservation { get; set; }
+
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime EndTimeOfReservation { get; set; }
 
-        public Reservation()
+        public Reservation(DateTime startTimeOfReservation)
         {
-            EndTimeOfReservation = TimeOfReservation.AddHours(3);
+            StartTimeOfReservation = startTimeOfReservation;
+            EndTimeOfReservation = StartTimeOfReservation.AddHours(3);
         }
     }
 }

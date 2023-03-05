@@ -22,7 +22,7 @@
     </MudText>
 
         <MudSpacer />
-        @if(userService.currentUser is not null)
+        @if (userService.currentUser is not null)
         {
             <a @onclick="@LogOut">Выйти</a>
             <a href="/personalPage">
@@ -51,11 +51,25 @@
         if (potentialUser is not null)
         {
             userService.currentUser = potentialUser;
+            if (userService.currentUser.Role == Enums.UserRoles.Customer)
+            {
+                await CheckForUserCart();
+
+            }
         }
 
-        if(!mongoConnection.IsDefaultManagerExists())
+        if (!mongoConnection.IsDefaultManagerExists())
         {
             mongoConnection.AddDefaultManagerToDataBase();
+        }
+    }
+
+    async Task CheckForUserCart()
+    {
+        var currentUserCart = await mongoConnection.GetUserCart(userService.currentUser.Id);
+        if (currentUserCart is null)
+        {
+            await mongoConnection.CreateUserCart(userService.currentUser.Id);
         }
     }
 
