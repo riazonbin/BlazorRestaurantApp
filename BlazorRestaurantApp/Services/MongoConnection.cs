@@ -1,5 +1,6 @@
 ﻿using BlazorRestaurantApp.Data;
 using DnsClient;
+using Microsoft.VisualBasic;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using static MongoDB.Driver.WriteConcern;
@@ -193,7 +194,7 @@ namespace BlazorRestaurantApp.Services
                 || x.StartTimeOfReservation.Subtract(DateTime.Now).Hours <= 3
                 && x.ReservedCustomerId != userId).ToList();
 
-            if (query is null || query.Count == 0)
+            if (query.Count == 0)
             {
                 return true;
             }
@@ -218,10 +219,12 @@ namespace BlazorRestaurantApp.Services
         {
             var reservationsOnTable = await GetReservationsByTableId(tableId);
 
-            if (reservationsOnTable
+            var query = reservationsOnTable
                             .Where(x => x.StartTimeOfReservation <= DateTime.Now
                            && x.EndTimeOfReservation >= DateTime.Now
-                           && x.ReservedCustomerId == customerId) is not null)
+                           && x.ReservedCustomerId == customerId).ToList();
+
+            if (query.Count >= 1)
             {
                 return true;
             }
@@ -239,6 +242,12 @@ namespace BlazorRestaurantApp.Services
         {
             var collection = _database.GetCollection<Reservation>("ReservationsCollection");
             return await collection.FindAsync(x => x.TableId == tableId).Result.ToListAsync();
+        }
+
+        public async Task DeleteOldReservations()
+        {
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            await collection.DeleteManyAsync(x => DateTime.Now > x.EndTimeOfReservation);
         }
 
         public async Task<List<Reservation>> GetReservationsByTableNumber(int tableNumber)
