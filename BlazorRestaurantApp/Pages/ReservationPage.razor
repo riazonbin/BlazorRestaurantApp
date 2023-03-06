@@ -1,5 +1,59 @@
-﻿<h3>ReservationPage</h3>
+﻿@page "/reservation"
+
+@inject ISnackbar Snackbar
+
+<MudPaper MaxWidth="80%" Style="margin: 0 auto">
+    <MudForm @bind-IsValid="isFormValid">
+        <MudCard Style="padding: 24px">
+            <MudDatePicker Label="Дата" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsDateCorrect())" @bind-Date="_date"/>
+            <MudTimePicker Label="Время" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsTimeCorrect())" @bind-Time="_time"></MudTimePicker>
+            <MudSelect Label="Число мест за столом" @bind-Value="_seats">
+                <MudSelectItem Value="2"></MudSelectItem>
+                <MudSelectItem Value="4"></MudSelectItem>
+                <MudSelectItem Value="6"></MudSelectItem>
+                <MudSelectItem Value="8"></MudSelectItem>
+            </MudSelect>
+
+
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Disabled="!isFormValid" OnClick="ReserveTable" ButtonType="ButtonType.Submit">Тест</MudButton>
+            </MudCardActions>
+
+        </MudCard>
+    </MudForm>
+</MudPaper>
 
 @code {
+    private DateTime? _date = DateTime.Today;
+    private TimeSpan? _time;
+    private int _seats = 2;
+    private bool isFormValid = false;
 
+    bool IsTimeCorrect()
+    {
+        if (_time > new TimeSpan(19, 0, 0) || _time < new TimeSpan(7, 0, 0))
+        {
+            Snackbar.Add("Диапазон времени бронирования с 7 до 19 часов", Severity.Error);
+            return false;
+        }
+        return true;
+    }
+
+    bool IsDateCorrect()
+    {
+        if (DateTime.Today.Date > _date.Value)
+        {
+            Snackbar.Add("Бронирование доступно только на будущие даты", Severity.Error);
+            return false;
+        }
+        return true;
+    }
+
+    void ReserveTable()
+    {
+        if (!IsTimeCorrect() || !IsDateCorrect())
+        {
+            return;
+        }
+    }
 }

@@ -205,11 +205,20 @@ namespace BlazorRestaurantApp.Services
         public async Task GenerateTables()
         {
             var collection = _database.GetCollection<Table>("TablesCollection");
+
             for(int i = 0; i < 40; ++i)
             {
+                Random random = new Random();
+                var numberOfSeats = random.Next(2, 9);
+                while(numberOfSeats % 2 != 0)
+                {
+                    numberOfSeats = random.Next(2, 9);
+                }
+
                 var table = new Table()
                 {
                     TableNumber= i + 1,
+                    NumberOfSeats = numberOfSeats
                 };
                 await collection.InsertOneAsync(table);
             }

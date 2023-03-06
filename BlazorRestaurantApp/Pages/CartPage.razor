@@ -5,6 +5,7 @@
 @inject MongoConnection mongoConnection
 @inject UserService userService
 @inject ILocalStorageService localStorageService;
+@inject ISnackbar Snackbar
 
 @if(userService.currentUser is null)
 {
@@ -105,7 +106,12 @@
 
     async Task AddOrder()
     {
-        await mongoConnection.AddOrder(currentCart, tableNumber);
+        if(await IsTableAvailable())
+        {
+            await mongoConnection.AddOrder(currentCart, tableNumber);
+            return;
+        }
+        Snackbar.Add("Столик уже занят!", Severity.Error);
     }
 
     async Task<bool> IsTableAvailable()

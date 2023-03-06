@@ -26,7 +26,7 @@ namespace BlazorRestaurantApp.Data
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Повторите пароль!")]
-        [Compare(nameof(Password))]
+        [Compare(nameof(Password), ErrorMessage ="Пароли не совпадают!")]
         public string RepeatedPassword { get; set; }
 
         [Required]

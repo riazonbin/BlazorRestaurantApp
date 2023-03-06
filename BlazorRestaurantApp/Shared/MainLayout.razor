@@ -63,7 +63,7 @@
             mongoConnection.AddDefaultManagerToDataBase();
         }
 
-        mongoConnection.DeleteOldReservations();
+        await mongoConnection.DeleteOldReservations();
     }
 
     async Task CheckForUserCart()
