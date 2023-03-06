@@ -202,6 +202,30 @@ namespace BlazorRestaurantApp.Services
             return false;
         }
 
+        public async Task<Table?> GetAvailableTable(string userId, int numberOfSeats, DateTime timeOfReservation)
+        {
+            var collection = _database.GetCollection<Table>("TablesCollection");
+
+            var tablesList = await collection.FindAsync(x => x.NumberOfSeats == numberOfSeats).Result.ToListAsync();
+
+            foreach(var table in tablesList)
+            {
+                var reservations = await GetReservationsByTableId(table.Id);
+
+                var results = reservations
+                    .Where(x => x.StartTimeOfReservation <= timeOfReservation
+                && x.EndTimeOfReservation >= timeOfReservation
+                || x.StartTimeOfReservation.Subtract(timeOfReservation).Hours <= 3).ToList();
+
+                if(results.Count == 0)
+                {
+                    return table;
+                }
+            }
+            return null;
+
+        }
+
         public async Task GenerateTables()
         {
             var collection = _database.GetCollection<Table>("TablesCollection");
@@ -282,7 +306,7 @@ namespace BlazorRestaurantApp.Services
             }
             else
             {
-                reservation = new Reservation(DateTime.Now)
+                reservation = new Reservation(timeOfReservation.Value)
                 {
                     ReservedCustomerId = userId,
                     TableId = table.Id

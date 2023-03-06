@@ -2,7 +2,7 @@
 @using BlazorRestaurantApp.Services;
 @inject UserService userService
 
-<MudNavMenu Class="mud-height-full" Style="background-color:white">
+<MudNavMenu Class="mud-height-full" Style="background-color:white" Color="Color.Primary">
     <MudDivider Class="my-2" />
     @if(isLoadingNavMenu)
     {
@@ -18,11 +18,14 @@
     }
 
     <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
-    <MudNavLink Href="/menu" Icon="@Icons.Material.Filled.Menu">Меню</MudNavLink>
+    <MudNavLink Href="/menu" Icon="@Icons.Material.Filled.RestaurantMenu">Меню</MudNavLink>
 
     @if (userService.currentUser.Role == Enums.UserRoles.Customer)
     {
             <MudNavLink Href="/cart" Icon="@Icons.Material.Filled.ShoppingCart">Корзина</MudNavLink>
+            <MudNavGroup Icon="@Icons.Material.Filled.Assignment" Title="Бронирования">
+                <MudNavLink Icon="@Icons.Material.Filled.Add" Href="/add-reservation">Добавить</MudNavLink>
+            </MudNavGroup>
     }
 
 </MudNavMenu>

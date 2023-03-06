@@ -1,0 +1,102 @@
+﻿@page "/add-reservation"
+@using BlazorRestaurantApp.Pages.Dialogs;
+@using BlazorRestaurantApp.Services;
+
+@inject ISnackbar Snackbar
+@inject MongoConnection mongoConnection
+@inject UserService userService
+@inject IDialogService dialogService
+
+<MudPaper MaxWidth="80%" Style="margin: 0 auto">
+    <MudCard Style="padding: 24px">
+        <MudForm @bind-IsValid="isFormValid">
+            <MudDatePicker Label="Дата" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsDateTimeCorrect())" @bind-Date="_date"/>
+            <MudTimePicker Label="Время" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsDateTimeCorrect())" @bind-Time="_time"></MudTimePicker>
+            <MudSelect Label="Число мест за столом" @bind-Value="_seats">
+                <MudSelectItem Value="2"></MudSelectItem>
+                <MudSelectItem Value="4"></MudSelectItem>
+                <MudSelectItem Value="6"></MudSelectItem>
+                <MudSelectItem Value="8"></MudSelectItem>
+            </MudSelect>
+            
+            <br />
+
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="!isFormValid" 
+                    OnClick="ReserveTable" ButtonType="ButtonType.Button">Забронировать
+                </MudButton>
+            </MudCardActions>
+
+        </MudForm>
+    </MudCard>
+</MudPaper>
+
+@code {
+    private DateTime? _date = DateTime.Today;
+    private TimeSpan? _time = DateTime.Now.TimeOfDay;
+    private int _seats = 2;
+    private bool isFormValid = false;
+
+    bool IsTimeCorrect()
+    {
+        if (_time > new TimeSpan(19, 0, 0) || _time < new TimeSpan(7, 0, 0))
+        {
+            Snackbar.Add("Диапазон времени бронирования с 7 до 19 часов", Severity.Error);
+            return false;
+        }
+        return true;
+    }
+
+    bool IsDateCorrect()
+    {
+        if (DateTime.Today.Date > _date.Value)
+        {
+            Snackbar.Add("Бронирование доступно только на будущие даты", Severity.Error);
+            return false;
+        }
+        return true;
+    }
+
+    bool IsDateTimeCorrect()
+    {
+        if(IsDateCorrect() && IsTimeCorrect() && _date.Value.AddHours(_time.Value.Hours) > DateTime.Now)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    async Task ReserveTable()
+    {
+        if (!IsDateTimeCorrect())
+        {
+            Snackbar.Add("Бронирование не доступно на прошедшее время", Severity.Error);
+            return;
+        }
+
+        var date = _date.Value.AddHours(_time.Value.Hours);
+
+        var availableTable = await mongoConnection.GetAvailableTable(userService.currentUser.Id, _seats, date);
+
+        if(availableTable is null)
+        {
+            Snackbar.Add("Свободных столиков нет на это время!", Severity.Error);
+            return;
+        }
+
+
+        await OpenDialog();
+
+        await mongoConnection.ReserveTable(availableTable.TableNumber, userService.currentUser.Id, date);
+
+        StateHasChanged();
+    }
+
+    private async Task OpenDialog()
+    {
+        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = false };
+        var dialog = await dialogService.ShowAsync<AddedReservationDialog>("Бронирование", options);
+
+        var result = await dialog.Result;
+    }
+}
