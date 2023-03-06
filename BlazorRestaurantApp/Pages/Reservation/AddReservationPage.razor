@@ -10,7 +10,16 @@
 <MudPaper MaxWidth="80%" Style="margin: 0 auto">
     <MudCard Style="padding: 24px">
         <MudForm @bind-IsValid="isFormValid">
-            <MudDatePicker Label="Дата" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsDateTimeCorrect())" @bind-Date="_date"/>
+            @{
+                var firstDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                var lastDate = firstDate.AddMonths(1);
+
+            }
+            <MudDatePicker Label="Дата" PickerVariant="PickerVariant.Inline" 
+                MinDate="@firstDate"
+                MaxDate="@lastDate"
+                Required="true" Error="@(!IsDateTimeCorrect())" @bind-Date="_date"
+            />
             <MudTimePicker Label="Время" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsDateTimeCorrect())" @bind-Time="_time"></MudTimePicker>
             <MudSelect Label="Число мест за столом" @bind-Value="_seats">
                 <MudSelectItem Value="2"></MudSelectItem>
@@ -89,7 +98,7 @@
 
         await mongoConnection.ReserveTable(availableTable.TableNumber, userService.currentUser.Id, date);
 
-        StateHasChanged();
+
     }
 
     private async Task OpenDialog()
