@@ -1,0 +1,64 @@
+﻿@using BlazorRestaurantApp.Enums;
+@using BlazorRestaurantApp.Services;
+@using BlazorRestaurantApp.Data;
+@using Majorsoft.Blazor.Components.Timer;
+@using System.ComponentModel.DataAnnotations;
+@inject MongoConnection mongoConnection;
+@inject UserService userService;
+@inject TimerService timerService;
+
+@if (ordersList.Count == 0 || ordersList is null)
+{
+    <MudAlert Severity="Severity.Info">Текущие заказы отсутствуют</MudAlert>
+    return;
+}
+<MudContainer>
+    <MudTable Items="ordersList" Dense="true" Outlined="true">
+        <HeaderContent>
+            <MudTh>Заказ</MudTh>
+            <MudTh>Когда заказан</MudTh>
+            <MudTh>Статус</MudTh>
+            <MudTh>Общая стоимость</MudTh>
+            <MudTh>Фамилия клиента</MudTh>
+            <MudTh>Имя клиента</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Заказ">@context.Id</MudTd>
+            <MudTd DataLabel="Когда заказан">@context.OrderStartTime</MudTd>
+            @{
+                var valueName = typeof(OrderStatuses).GetMember(context.Status.ToString())[0]
+                .GetCustomAttributes(typeof(DisplayAttribute), false)
+                .OfType<DisplayAttribute>()
+                .FirstOrDefault()?.Name;
+            }
+            <MudTd DataLabel="Статус">@valueName</MudTd>
+            <MudTd DataLabel="Общая стоимость">@(context.CartItems.Sum(i => i.MenuItem.Price * i.Quantity).ToString("C"))</MudTd>
+            <MudTd DataLabel="Фамилия клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Lastname)</MudTd>
+            <MudTd DataLabel="Имя клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Firstname)</MudTd>
+        </RowTemplate>
+    </MudTable>
+
+                <MudHidden>
+                    <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="5000" 
+        OnIntervalElapsed="@GetCustomersOrders" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
+                </MudHidden>
+
+</MudContainer>
+
+    @code {
+
+    List<Order> ordersList = new List<Order>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCustomersOrders();
+    }
+
+    public async Task GetCustomersOrders()
+    {
+        ordersList = await mongoConnection.GetAllActiveOrders();
+        ordersList = ordersList.Where(x => x.Status != Enums.OrderStatuses.IsDelivered).ToList();
+    }
+
+}

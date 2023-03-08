@@ -23,10 +23,15 @@
 
     @if (userService.currentUser.Role == Enums.UserRoles.Customer)
     {
-            <MudNavLink Href="/cart" Icon="@Icons.Material.Filled.ShoppingCart">Корзина</MudNavLink>
-            <MudNavGroup Icon="@Icons.Material.Filled.Assignment" Title="Бронирования">
-                <MudNavLink Icon="@Icons.Material.Filled.Add" Href="/add-reservation">Добавить</MudNavLink>
-            </MudNavGroup>
+        <MudNavLink Href="/cart" Icon="@Icons.Material.Filled.ShoppingCart">Корзина</MudNavLink>
+        <MudNavGroup Icon="@Icons.Material.Filled.Assignment" Title="Бронирования">
+            <MudNavLink Icon="@Icons.Material.Filled.Add" Href="/add-reservation">Добавить</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.ViewList" Href="/reservations-info">Ваши бронирования</MudNavLink>
+        </MudNavGroup>
+    }
+    else
+    {
+        <MudNavLink Icon="@Icons.Material.Filled.Assessment" Href="/reservations-info">Бронирования клиентов</MudNavLink>
     }
 
 </MudNavMenu>

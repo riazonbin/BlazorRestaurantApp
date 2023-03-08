@@ -50,16 +50,20 @@
     private int _seats = 2;
     private bool isFormValid = false;
 
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        Snackbar.Clear();
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
     bool IsTimeCorrect()
     {
         if (_time > new TimeSpan(19, 0, 0) || _time < new TimeSpan(7, 0, 0))
         {
-            Snackbar.Add("Диапазон времени бронирования с 7 до 19 часов", Severity.Error);
             return false;
         }
-        if (_date.Value.AddHours(_time.Value.Hours) < DateTime.Now)
+        if (_date.Value.AddMinutes(_time.Value.TotalMinutes) < DateTime.Now)
         {
-            Snackbar.Add("Бронирование доступно только на будущее время!", Severity.Error);
             return false;
         }
         return true;
@@ -67,9 +71,8 @@
 
     bool IsDateCorrect()
     {
-        if (DateTime.Today.Date > _date.Value || _date.Value.AddHours(_time.Value.Hours) < DateTime.Now)
+        if (DateTime.Today.Date > _date.Value || _date.Value.AddMinutes(_time.Value.TotalMinutes) < DateTime.Now)
         {
-            Snackbar.Add("Бронирование доступно только на будущие даты", Severity.Error);
             return false;
         }
         return true;

@@ -29,7 +29,7 @@
                 <a @onclick="@LogOut">Выйти</a>
                 <a href="/personalPage">
                     <MudIconButton Edge="Edge.End">
-                        <MudAvatar Color="Color.Secondary">@userService.currentUser?.Firstname[0]</MudAvatar>
+                        <MudAvatar Color="Color.Secondary">@userService.currentUser?.Lastname[0]@userService.currentUser?.Firstname[0]</MudAvatar>
                     </MudIconButton>
                 </a>
         }

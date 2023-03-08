@@ -2,6 +2,7 @@
 {
     public static class StaticData
     {
-        public static int ReservationTime = 5;
+        public static int ReservationTime = 10;
+        public static int TimerInterval = 30;
     }
 }

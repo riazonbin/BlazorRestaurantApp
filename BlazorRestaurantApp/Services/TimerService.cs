@@ -1,10 +1,11 @@
-﻿using MudBlazor.Extensions;
+﻿using BlazorRestaurantApp.Data;
+using MudBlazor.Extensions;
 
 namespace BlazorRestaurantApp.Services
 {
     public class TimerService
     {
-        private PeriodicTimer _timer = new(TimeSpan.FromSeconds(10));
+        private PeriodicTimer _timer = new(TimeSpan.FromSeconds(StaticData.TimerInterval));
         public Action Elapsed;
 
 

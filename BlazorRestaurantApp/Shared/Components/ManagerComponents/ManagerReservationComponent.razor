@@ -1,0 +1,64 @@
+﻿@using BlazorRestaurantApp.Services;
+@using BlazorRestaurantApp.Data;
+@using static MudBlazor.CategoryTypes;
+@inject MongoConnection mongoConnection
+@inject UserService userService
+
+<MudTable @ref="@_table"  Items="@reservations" Dense Hover>
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Бронирования клиентов</MudText>
+        <MudSpacer />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Начало брони<MudTableSortLabel SortBy="new Func<Reservation, object>(x => x.StartTimeOfReservation)"></MudTableSortLabel></MudTh>
+        <MudTh>Конец брони<MudTableSortLabel SortBy="new Func<Reservation, object>(x => x.EndTimeOfReservation)"></MudTableSortLabel></MudTh>
+        <MudTh>Номер стола</MudTh>
+        <MudTh>Фамилия клиента</MudTh>
+        <MudTh>Имя клиента</MudTh>
+        <MudTh>Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Начало брони">@context.StartTimeOfReservation</MudTd>
+        <MudTd DataLabel="Конец брони">@context.EndTimeOfReservation</MudTd>
+
+        <MudTd DataLabel="Номер стола">@(mongoConnection.GetTableByTableId(context.TableId).Result.TableNumber)</MudTd>
+
+        <MudTd DataLabel="Фамилия клиента">@(mongoConnection.FindCustomerById(context.ReservedCustomerId).Result.Lastname)</MudTd>
+        <MudTd DataLabel="Имя клиента">@(mongoConnection.FindCustomerById(context.ReservedCustomerId).Result.Firstname)</MudTd>
+
+        <MudTd DataLabel="Действия"><MudButton Variant="Variant.Filled" OnClick="@(() => DeleteReservation(context.Id) )" Color="Color.Error">Удалить бронь</MudButton></MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager RowsPerPageString="Кол-во строк в таблице" InfoFormat="{first_item}-{last_item} из {all_items}" />
+            <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+        </PagerContent>
+    </MudTable>
+
+
+    @code {
+    private MudTable<Reservation> _table;
+    List<Reservation> reservations = new List<Reservation>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetReservationByCustomerId();
+    }
+
+    public async Task GetReservationByCustomerId()
+    {
+        reservations = await mongoConnection.GetAllReservations();
+    }
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
+    }
+
+    public async Task DeleteReservation(string reservationId)
+    {
+        await mongoConnection.DeleteReservationById(reservationId);
+        await GetReservationByCustomerId();
+    }
+
+}

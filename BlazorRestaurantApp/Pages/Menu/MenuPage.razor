@@ -11,6 +11,7 @@
 @inject NavigationManager navigationManager
 @inject UserService userService;
 
+
 @if(userService.currentUser?.Role == UserRoles.Customer)
 {
     <CustomerMenuComponent></CustomerMenuComponent>
@@ -19,6 +20,7 @@ else if(userService.currentUser?.Role == UserRoles.Employee)
 {
     <ManagerMenuComponent></ManagerMenuComponent>
 }
+
 
 @code {
 }

@@ -13,15 +13,14 @@
 }
 
 
-<MudContainer>
-
     @if (currentCart.Items.Count == 0 || currentCart is null)
     {
         <MudAlert Severity="Severity.Info">Ваша корзина пуста.</MudAlert>
+        return;
     }
-    else
-    {
-        <MudTable Items="currentCart.Items" Dense="true" Outlined="true" ContainerClass="mt-4">
+
+<MudContainer>
+        <MudTable Items="currentCart.Items" Dense="true" Outlined="true">
             <HeaderContent>
                 <MudTh>Блюдо</MudTh>
                 <MudTh>Стоимость за единицу</MudTh>
@@ -65,7 +64,6 @@
         <br />
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async => AddOrder())" Class="mt-4">Оплатить заказ</MudButton>
-    }
 </MudContainer>
 
 @code {

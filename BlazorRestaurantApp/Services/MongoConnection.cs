@@ -265,10 +265,16 @@ namespace BlazorRestaurantApp.Services
             return false;
         }
 
-        public async Task<Table> GetTableByNumber(int tableNumber)
+        public async Task<Table> GetTableByTableNumber(int tableNumber)
         {
             var collection = _database.GetCollection<Table>("TablesCollection");
             return await collection.FindAsync(x => x.TableNumber == tableNumber).Result.FirstOrDefaultAsync();
+        }
+
+        public async Task<Table> GetTableByTableId(string tableId)
+        {
+            var collection = _database.GetCollection<Table>("TablesCollection");
+            return await collection.FindAsync(x => x.Id == tableId).Result.FirstOrDefaultAsync();
         }
 
         public async Task<List<Reservation>> GetReservationsByTableId(string tableId)
@@ -283,17 +289,35 @@ namespace BlazorRestaurantApp.Services
             await collection.DeleteManyAsync(x => DateTime.Now > x.EndTimeOfReservation);
         }
 
+        public async Task DeleteReservationById(string reservationId)
+        {
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            await collection.DeleteOneAsync(x => x.Id == reservationId);
+        }
+
         public async Task<List<Reservation>> GetReservationsByTableNumber(int tableNumber)
         {
-            var table = await GetTableByNumber(tableNumber);
+            var table = await GetTableByTableNumber(tableNumber);
             var collection = _database.GetCollection<Reservation>("ReservationsCollection");
             return await collection.FindAsync(x => x.Id == table.Id).Result.ToListAsync();
+        }
+
+        public async Task<List<Reservation>> GetReservationsByCustomerId(string customerId)
+        {
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            return await collection.FindAsync(x => x.ReservedCustomerId == customerId).Result.ToListAsync();
+        }
+
+        public async Task<List<Reservation>> GetAllReservations()
+        {
+            var collection = _database.GetCollection<Reservation>("ReservationsCollection");
+            return await collection.FindAsync(new BsonDocument()).Result.ToListAsync();
         }
 
         public async Task ReserveTable(int tableNumber, string userId, DateTime? timeOfReservation)
         {
             var collection = _database.GetCollection<Reservation>("ReservationsCollection");
-            var table = await GetTableByNumber(tableNumber);
+            var table = await GetTableByTableNumber(tableNumber);
 
             Reservation reservation;
             if (timeOfReservation is null)
@@ -320,7 +344,7 @@ namespace BlazorRestaurantApp.Services
 
         public async Task AddOrder(Cart userCart, int tableNumber)
         {
-            var table = await GetTableByNumber(tableNumber);
+            var table = await GetTableByTableNumber(tableNumber);
 
             if (!await IsCustomerHasSoonReservationsOnTable(userCart.UserId, table.Id))
             {
@@ -347,6 +371,12 @@ namespace BlazorRestaurantApp.Services
         {
             var collection = _database.GetCollection<Order>("OrdersCollection");
             return await collection.FindAsync(x => x.CustomerId == customerId).Result.ToListAsync();
+        }
+
+        public async Task<List<Order>> GetAllActiveOrders()
+        {
+            var collection = _database.GetCollection<Order>("OrdersCollection");
+            return await collection.FindAsync(new BsonDocument()).Result.ToListAsync();
         }
 
         public async Task UpdateOrdersStatuses()
@@ -421,6 +451,12 @@ namespace BlazorRestaurantApp.Services
             var filter = Builders<Customer>.Filter.Eq("Email", email);
             var collection = _database.GetCollection<Customer>("CustomersCollection");
             return collection.Find(filter).FirstOrDefault();
+        }
+
+        public async Task<Customer> FindCustomerById(string customerId)
+        {
+            var collection = _database.GetCollection<Customer>("CustomersCollection");
+            return await collection.FindAsync(x => x.Id == customerId).Result.FirstOrDefaultAsync();
         }
 
         public Employee FindEmployeeByEmail(string email)
