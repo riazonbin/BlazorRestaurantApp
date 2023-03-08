@@ -479,6 +479,13 @@ namespace BlazorRestaurantApp.Services
             var collection = _database.GetCollection<MenuItem>("MenuItemsCollection");
             await collection.DeleteOneAsync(x => x.Id == item.Id);
         }
+
+        public async Task UpdateCustomer(Customer customer)
+        {
+            var collection = _database.GetCollection<Customer>("CustomersCollection");
+            await collection.ReplaceOneAsync(x => x.Id == customer.Id, customer);
+        }
+
         #endregion
     }
 }

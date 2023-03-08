@@ -1,0 +1,32 @@
+﻿@page "/personal-info"
+
+@using BlazorRestaurantApp.Enums;
+@using BlazorRestaurantApp.Services;
+@using BlazorRestaurantApp.Data;
+@using Majorsoft.Blazor.Components.Timer;
+@using BlazorRestaurantApp.Shared.Components.CustomerComponents;
+@using BlazorRestaurantApp.Shared.Components.ManagerComponents;
+@using System.ComponentModel.DataAnnotations;
+@inject MongoConnection mongoConnection;
+@inject UserService userService;
+@inject TimerService timerService;
+
+
+
+@if(userService.currentUser is null)
+{
+    return;
+}
+
+@if(userService.currentUser.Role == UserRoles.Customer)
+{
+    <CustomerPersonalPageComponent></CustomerPersonalPageComponent>
+}
+else
+{
+    <ManagerPersonalPageComponent></ManagerPersonalPageComponent>
+}
+
+@code {
+
+}

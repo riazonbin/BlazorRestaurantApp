@@ -1,0 +1,47 @@
+﻿@using BlazorRestaurantApp.Enums;
+@using BlazorRestaurantApp.Pages.Dialogs;
+@using BlazorRestaurantApp.Services;
+@using BlazorRestaurantApp.Data;
+@using Majorsoft.Blazor.Components.Timer;
+@using BlazorRestaurantApp.Shared.Components.CustomerComponents;
+@using BlazorRestaurantApp.Shared.Components.ManagerComponents;
+@using System.ComponentModel.DataAnnotations;
+@inject MongoConnection mongoConnection;
+@inject UserService userService;
+@inject TimerService timerService;
+@inject ILocalStorageService localStorageService;
+@inject IDialogService DialogService
+@inject NavigationManager navigationManager
+
+<MudPaper>
+    <MudContainer>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudCard>
+                    <MudCardHeader>
+                        <h2 style="margin-right:2%">Личный кабинет</h2>
+                        <MudAvatar Color="Color.Info" Size="Size.Large">@model.Lastname[0]@model.Firstname[0]</MudAvatar>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudTextField T="string" Label="Фамилия" Disabled @bind-Text=@model.Lastname></MudTextField>
+                        <MudTextField T="string" Label="Имя" Disabled  @bind-Text=@model.Firstname></MudTextField>
+                        <MudTextField T="string" Label="Отчество" Disabled @bind-Text=@model.Patronymic></MudTextField>
+                        <MudTextField T="string" InputType="InputType.Email" Label="Почта" Disabled @bind-Text=@userService.currentUser.Email></MudTextField>
+                        <MudTextField T="string" InputType="InputType.Password" Label="Пароль" Disabled @bind-Text=@userService.currentUser.Password></MudTextField>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+    </MudContainer>
+</MudPaper>
+
+@code {
+    User model = new User();
+
+    protected override Task OnInitializedAsync()
+    {
+        model = userService.currentUser;
+        return base.OnInitializedAsync();
+    }
+}
