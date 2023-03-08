@@ -109,6 +109,7 @@
         if(await IsTableAvailable())
         {
             await mongoConnection.AddOrder(currentCart, tableNumber);
+            Snackbar.Add("Над вашим заказом уже работают!", Severity.Success);
             return;
         }
         Snackbar.Add("Столик уже занят!", Severity.Error);

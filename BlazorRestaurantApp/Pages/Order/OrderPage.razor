@@ -7,6 +7,7 @@
 @using System.ComponentModel.DataAnnotations;
 @inject MongoConnection mongoConnection;
 @inject UserService userService;
+@inject TimerService timerService;
 
 
 <MudTable Items="ordersList" Dense="true" Outlined="true" ContainerClass="mt-4">
@@ -30,9 +31,9 @@
         </RowTemplate>
     </MudTable>
 
-        <MudHidden>
+    <MudHidden>
         <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="5000" 
-    OnIntervalElapsed="@GetCustomersOrders" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
+        OnIntervalElapsed="@GetCustomersOrders" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
     </MudHidden>
 
     @code {
@@ -42,7 +43,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        GetCustomersOrders();
+        await GetCustomersOrders();
     }
 
     public async Task GetCustomersOrders()
@@ -50,8 +51,5 @@
         ordersList = await mongoConnection.GetCustomersOrders(userService.currentUser.Id);
         ordersList = ordersList.Where(x => x.Status != Enums.OrderStatuses.IsDelivered).ToList();
     }
-
-
-
 
 }

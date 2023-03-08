@@ -6,6 +6,7 @@
 @inject UserService userService;
 @inject MongoConnection mongoConnection;
 @inject NavigationManager navigationManager;
+@inject TimerService timerService;
 @inherits LayoutComponentBase
 
 <PageTitle>Ресторан</PageTitle>
@@ -25,12 +26,12 @@
         <MudSpacer />
         @if (userService.currentUser is not null)
         {
-            <a @onclick="@LogOut">Выйти</a>
-            <a href="/personalPage">
-                <MudIconButton Edge="Edge.End">
-                    <MudAvatar Color="Color.Secondary">@userService.currentUser?.Firstname[0]</MudAvatar>
-                </MudIconButton>
-            </a>
+                <a @onclick="@LogOut">Выйти</a>
+                <a href="/personalPage">
+                    <MudIconButton Edge="Edge.End">
+                        <MudAvatar Color="Color.Secondary">@userService.currentUser?.Firstname[0]</MudAvatar>
+                    </MudIconButton>
+                </a>
         }
 
     </MudAppBar>
@@ -44,10 +45,10 @@
     </MudMainContent>
 </MudLayout>
 
-<MudHidden>
+@*<MudHidden>
     <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="10000" 
     OnIntervalElapsed="@UpdateOrdersStatuses" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
-</MudHidden>
+</MudHidden>*@
 
 @code
 {
@@ -70,6 +71,9 @@
         }
 
         await mongoConnection.DeleteOldReservations();
+
+        timerService.Elapsed = null;
+        timerService.Elapsed += UpdateOrdersStatuses;
     }
 
     async Task CheckForUserCart()

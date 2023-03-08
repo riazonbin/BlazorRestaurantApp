@@ -191,7 +191,7 @@ namespace BlazorRestaurantApp.Services
                 .Where(x => x.StartTimeOfReservation <= DateTime.Now
                 && x.EndTimeOfReservation >= DateTime.Now
                 && x.ReservedCustomerId != userId
-                || x.StartTimeOfReservation.Subtract(DateTime.Now).TotalMinutes <= 4
+                || x.StartTimeOfReservation.Subtract(DateTime.Now).TotalMinutes <= StaticData.ReservationTime
                 && x.ReservedCustomerId != userId).ToList();
 
             if (query.Count == 0)
@@ -215,7 +215,7 @@ namespace BlazorRestaurantApp.Services
                 var results = reservations
                     .Where(x => x.StartTimeOfReservation <= timeOfReservation
                 && x.EndTimeOfReservation >= timeOfReservation
-                || x.StartTimeOfReservation.Subtract(timeOfReservation).TotalMinutes <= 4).ToList();
+                || x.StartTimeOfReservation.Subtract(timeOfReservation).TotalMinutes <= StaticData.ReservationTime).ToList();
 
                 if(results.Count == 0)
                 {
@@ -355,10 +355,11 @@ namespace BlazorRestaurantApp.Services
 
             var ordersList = await collection.FindAsync(new BsonDocument()).Result.ToListAsync();
 
-            Random random = new Random();
 
             foreach (var order in ordersList)
             {
+                Random random = new Random();
+
                 if(order.Status == Enums.OrderStatuses.IsDelivered)
                 {
                     continue;
@@ -369,21 +370,13 @@ namespace BlazorRestaurantApp.Services
                 }
                 else if(order.Status == Enums.OrderStatuses.IsCooking) 
                 {
-                    if(DateTime.Now.Subtract(order.OrderStartTime).TotalSeconds >= 30)
-                    {
-                        order.Status = Enums.OrderStatuses.IsCooked;
-                    }
-                    if(random.Next(1, 4) == 1)
+                    if(random.Next(1, 3) == 1)
                     {
                         order.Status = Enums.OrderStatuses.IsCooked;
                     }
                 }
                 else if (order.Status == Enums.OrderStatuses.IsCooked)
                 {
-                    if (DateTime.Now.Subtract(order.OrderStartTime).TotalSeconds >= 40)
-                    {
-                        order.Status = Enums.OrderStatuses.IsDelivering;
-                    }
                     if (random.Next(1, 2) == 1)
                     {
                         order.Status = Enums.OrderStatuses.IsDelivering;
@@ -391,10 +384,6 @@ namespace BlazorRestaurantApp.Services
                 }
                 else if (order.Status == Enums.OrderStatuses.IsDelivering)
                 {
-                    if (DateTime.Now.Subtract(order.OrderStartTime).TotalSeconds >= 50)
-                    {
-                        order.Status = Enums.OrderStatuses.IsDelivered;
-                    }
                     if (random.Next(1, 2) == 1)
                     {
                         order.Status = Enums.OrderStatuses.IsDelivered;

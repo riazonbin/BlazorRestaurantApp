@@ -14,6 +14,7 @@ builder.Services.AddScoped<MongoConnection>();
 builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddScoped<FileSystemService>();
+builder.Services.AddSingleton<TimerService>();
 
 var app = builder.Build();
 
