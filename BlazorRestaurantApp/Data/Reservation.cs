@@ -22,7 +22,7 @@ namespace BlazorRestaurantApp.Data
         public Reservation(DateTime startTimeOfReservation)
         {
             StartTimeOfReservation = startTimeOfReservation;
-            EndTimeOfReservation = StartTimeOfReservation.AddHours(3);
+            EndTimeOfReservation = StartTimeOfReservation.AddMinutes(4);
         }
     }
 }

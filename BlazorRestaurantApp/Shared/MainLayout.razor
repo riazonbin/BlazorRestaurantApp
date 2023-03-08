@@ -1,5 +1,6 @@
 ﻿@using BlazorRestaurantApp.Data;
 @using BlazorRestaurantApp.Services;
+@using Majorsoft.Blazor.Components.Timer;
 @using MudBlazor
 @inject ILocalStorageService localStorageService;
 @inject UserService userService;
@@ -43,6 +44,11 @@
     </MudMainContent>
 </MudLayout>
 
+<MudHidden>
+    <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="10000" 
+    OnIntervalElapsed="@UpdateOrdersStatuses" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
+</MudHidden>
+
 @code
 {
     protected override async Task OnInitializedAsync()
@@ -82,6 +88,11 @@
         localStorageService.RemoveAsync("CurrentUser");
 
         navigationManager.NavigateTo("/");
+    }
+
+    async void UpdateOrdersStatuses()
+    {
+        await mongoConnection.UpdateOrdersStatuses();
     }
 
     private bool _drawerOpen = true;

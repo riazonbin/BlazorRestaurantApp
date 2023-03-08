@@ -32,7 +32,7 @@
 
 @if (!isCorrectAuthorizationUser)
 {
-    <MudAlert Severity="Severity.Error">Такого пользователя не существует!</MudAlert>
+    <MudAlert Severity="Severity.Error">Неверная почта или пароль!</MudAlert>
 }
 
 
@@ -53,6 +53,11 @@
         }
         else
         {
+            if(foundedUser.Password != user.Password)
+            {
+                isCorrectAuthorizationUser = false;
+                return;
+            }
             userService.currentUser = foundedUser;
             await localStorageService.SetAsync<User>("CurrentUser", foundedUser);
             if(foundedUser.Role == UserRoles.Customer)

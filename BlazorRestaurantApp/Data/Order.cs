@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
+using BlazorRestaurantApp.Enums;
 
 namespace BlazorRestaurantApp.Data
 {
@@ -20,5 +21,7 @@ namespace BlazorRestaurantApp.Data
         public DateTime OrderEndTime { get; set; }
 
         public string TableId { get; set; }
+
+        public OrderStatuses Status { get; set; }
     }
 }

@@ -41,13 +41,15 @@
             imageData = GetImageSource(menuItem.ImageId);
         }
             <MudItem xs="12" sm="6" md="4" lg="3">
-                <MudCard Style="min-height:550px; min-width: 250px; position:relative;">
+                    <MudCard Style="min-height:550px; min-width: 250px; position: relative">
                     <MudCardMedia Image="@imageData"/>
-                    <MudCardContent>
+                    <MudCardContent Style="position:relative">
                         <h3>@menuItem.Name</h3>
                         <p>@menuItem.Description</p>
+                    </MudCardContent>
+                    <MudCardContent Style="position: absolute; bottom: 0; width: 100%" >
                         <h4>@menuItem.Price.ToString("C") / @menuItem.Weight грамм </h4>
-                        <MudButton Style="position: absolute; bottom: 0; width: 100%" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToEditItem(menuItem.Id.ToString()))">Изменить</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToEditItem(menuItem.Id.ToString()))">Изменить</MudButton>
                     </MudCardContent>
                 </MudCard>
             </MudItem>

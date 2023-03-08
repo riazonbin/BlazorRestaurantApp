@@ -191,7 +191,7 @@ namespace BlazorRestaurantApp.Services
                 .Where(x => x.StartTimeOfReservation <= DateTime.Now
                 && x.EndTimeOfReservation >= DateTime.Now
                 && x.ReservedCustomerId != userId
-                || x.StartTimeOfReservation.Subtract(DateTime.Now).Hours <= 3
+                || x.StartTimeOfReservation.Subtract(DateTime.Now).TotalMinutes <= 4
                 && x.ReservedCustomerId != userId).ToList();
 
             if (query.Count == 0)
@@ -215,7 +215,7 @@ namespace BlazorRestaurantApp.Services
                 var results = reservations
                     .Where(x => x.StartTimeOfReservation <= timeOfReservation
                 && x.EndTimeOfReservation >= timeOfReservation
-                || x.StartTimeOfReservation.Subtract(timeOfReservation).Hours <= 3).ToList();
+                || x.StartTimeOfReservation.Subtract(timeOfReservation).TotalMinutes <= 4).ToList();
 
                 if(results.Count == 0)
                 {
@@ -332,7 +332,8 @@ namespace BlazorRestaurantApp.Services
                 CartItems = userCart.Items,
                 CustomerId = userCart.UserId,
                 OrderStartTime = DateTime.Now,
-                TableId = table.Id
+                TableId = table.Id,
+                Status = Enums.OrderStatuses.InProgress
             };
 
             var collection = _database.GetCollection<Order>("OrdersCollection");
@@ -340,6 +341,68 @@ namespace BlazorRestaurantApp.Services
             await collection.InsertOneAsync(order);
 
             await ClearUserCart(userCart);
+        }
+
+        public async Task<List<Order>> GetCustomersOrders(string customerId)
+        {
+            var collection = _database.GetCollection<Order>("OrdersCollection");
+            return await collection.FindAsync(x => x.CustomerId == customerId).Result.ToListAsync();
+        }
+
+        public async Task UpdateOrdersStatuses()
+        {
+            var collection = _database.GetCollection<Order>("OrdersCollection");
+
+            var ordersList = await collection.FindAsync(new BsonDocument()).Result.ToListAsync();
+
+            Random random = new Random();
+
+            foreach (var order in ordersList)
+            {
+                if(order.Status == Enums.OrderStatuses.IsDelivered)
+                {
+                    continue;
+                }
+                else if(order.Status == Enums.OrderStatuses.InProgress)
+                {
+                    order.Status= Enums.OrderStatuses.IsCooking;
+                }
+                else if(order.Status == Enums.OrderStatuses.IsCooking) 
+                {
+                    if(DateTime.Now.Subtract(order.OrderStartTime).TotalSeconds >= 30)
+                    {
+                        order.Status = Enums.OrderStatuses.IsCooked;
+                    }
+                    if(random.Next(1, 4) == 1)
+                    {
+                        order.Status = Enums.OrderStatuses.IsCooked;
+                    }
+                }
+                else if (order.Status == Enums.OrderStatuses.IsCooked)
+                {
+                    if (DateTime.Now.Subtract(order.OrderStartTime).TotalSeconds >= 40)
+                    {
+                        order.Status = Enums.OrderStatuses.IsDelivering;
+                    }
+                    if (random.Next(1, 2) == 1)
+                    {
+                        order.Status = Enums.OrderStatuses.IsDelivering;
+                    }
+                }
+                else if (order.Status == Enums.OrderStatuses.IsDelivering)
+                {
+                    if (DateTime.Now.Subtract(order.OrderStartTime).TotalSeconds >= 50)
+                    {
+                        order.Status = Enums.OrderStatuses.IsDelivered;
+                    }
+                    if (random.Next(1, 2) == 1)
+                    {
+                        order.Status = Enums.OrderStatuses.IsDelivered;
+                    }
+                }
+                await collection.ReplaceOneAsync(x => x.Id == order.Id, order);
+            }
+
 
         }
 

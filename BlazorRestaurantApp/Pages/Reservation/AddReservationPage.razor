@@ -18,9 +18,12 @@
             <MudDatePicker Label="Дата" PickerVariant="PickerVariant.Inline" 
                 MinDate="@firstDate"
                 MaxDate="@lastDate"
-                Required="true" Error="@(!IsDateTimeCorrect())" @bind-Date="_date"
+                Required="true" Error="@(!IsDateCorrect())" @bind-Date="_date" ErrorText="Укажите корректную дату!"
             />
-            <MudTimePicker Label="Время" PickerVariant="PickerVariant.Inline" Required="true" Error="@(!IsDateTimeCorrect())" @bind-Time="_time"></MudTimePicker>
+            <MudTimePicker Label="Время" PickerVariant="PickerVariant.Inline" 
+                Required="true" Error="@(!IsTimeCorrect())" 
+                @bind-Time="_time" ErrorText="Укажите корректное время">
+            </MudTimePicker>
             <MudSelect Label="Число мест за столом" @bind-Value="_seats">
                 <MudSelectItem Value="2"></MudSelectItem>
                 <MudSelectItem Value="4"></MudSelectItem>
@@ -31,7 +34,7 @@
             <br />
 
             <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="!isFormValid" 
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="!IsDateTimeCorrect()" 
                     OnClick="ReserveTable" ButtonType="ButtonType.Button">Забронировать
                 </MudButton>
             </MudCardActions>
@@ -53,12 +56,17 @@
             Snackbar.Add("Диапазон времени бронирования с 7 до 19 часов", Severity.Error);
             return false;
         }
+        if (_date.Value.AddHours(_time.Value.Hours) < DateTime.Now)
+        {
+            Snackbar.Add("Бронирование доступно только на будущее время!", Severity.Error);
+            return false;
+        }
         return true;
     }
 
     bool IsDateCorrect()
     {
-        if (DateTime.Today.Date > _date.Value)
+        if (DateTime.Today.Date > _date.Value || _date.Value.AddHours(_time.Value.Hours) < DateTime.Now)
         {
             Snackbar.Add("Бронирование доступно только на будущие даты", Severity.Error);
             return false;
@@ -68,7 +76,7 @@
 
     bool IsDateTimeCorrect()
     {
-        if(IsDateCorrect() && IsTimeCorrect() && _date.Value.AddHours(_time.Value.Hours) > DateTime.Now)
+        if(IsDateCorrect() && IsTimeCorrect())
         {
             return true;
         }
@@ -83,7 +91,7 @@
             return;
         }
 
-        var date = _date.Value.AddHours(_time.Value.Hours);
+        var date = _date.Value.AddMinutes(_time.Value.TotalMinutes);
 
         var availableTable = await mongoConnection.GetAvailableTable(userService.currentUser.Id, _seats, date);
 
@@ -94,10 +102,10 @@
         }
 
 
-        await OpenDialog();
 
         await mongoConnection.ReserveTable(availableTable.TableNumber, userService.currentUser.Id, date);
 
+        await OpenDialog();
 
     }
 
