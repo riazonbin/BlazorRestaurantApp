@@ -27,7 +27,7 @@
         @if (userService.currentUser is not null)
         {
                 <a @onclick="@LogOut">Выйти</a>
-                <a href="/personalPage">
+                <a href="/personal-info">
                     <MudIconButton Edge="Edge.End">
                         <MudAvatar Color="Color.Info">@userService.currentUser?.Lastname[0]@userService.currentUser?.Firstname[0]</MudAvatar>
                     </MudIconButton>

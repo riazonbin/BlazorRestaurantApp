@@ -9,13 +9,13 @@
 
 @if (ordersList.Count == 0 || ordersList is null)
 {
-            <MudAlert Severity="Severity.Info">Текущие заказы отсутствуют</MudAlert>
+            <MudAlert Severity="Severity.Info">История заказов пуста</MudAlert>
     return;
 }
 
 <MudTable Items="ordersList" Dense="true" Outlined="true">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Ваши текущие заказы</MudText>
+        <MudText Typo="Typo.h6">Ваша история заказов</MudText>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Заказ</MudTh>
