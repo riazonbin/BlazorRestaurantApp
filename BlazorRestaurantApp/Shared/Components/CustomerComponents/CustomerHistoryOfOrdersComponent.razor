@@ -9,10 +9,9 @@
 
 @if (ordersList.Count == 0 || ordersList is null)
 {
-        <MudAlert Severity="Severity.Info">Текущие заказы отсутствуют</MudAlert>
+            <MudAlert Severity="Severity.Info">Текущие заказы отсутствуют</MudAlert>
     return;
 }
-
 
 <MudTable Items="ordersList" Dense="true" Outlined="true">
     <ToolBarContent>
@@ -21,27 +20,21 @@
     <HeaderContent>
         <MudTh>Заказ</MudTh>
         <MudTh>Когда заказан</MudTh>
-        <MudTh>Статус</MudTh>
+        <MudTh>Когда доставлен</MudTh>
         <MudTh>Общая стоимость</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Заказ">@context.Id</MudTd>
         <MudTd DataLabel="Когда заказан">@context.OrderStartTime</MudTd>
-        @{
-            var valueName = typeof(OrderStatuses).GetMember(context.Status.ToString())[0]
-            .GetCustomAttributes(typeof(DisplayAttribute), false)
-            .OfType<DisplayAttribute>()
-            .FirstOrDefault()?.Name;
-        }
-        <MudTd DataLabel="Статус">@valueName</MudTd>
+        <MudTd DataLabel="Когда заказан">@context.OrderEndTime</MudTd>
         <MudTd DataLabel="Общая стоимость">@(context.CartItems.Sum(i => i.MenuItem.Price * i.Quantity).ToString("C"))</MudTd>
-            </RowTemplate>
-        </MudTable>
+                </RowTemplate>
+            </MudTable>
 
-        <MudHidden>
-            <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="5000" 
+            <MudHidden>
+                <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="5000" 
         OnIntervalElapsed="@GetCustomersOrders" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
-        </MudHidden>
+            </MudHidden>
 
     @code {
 
@@ -56,7 +49,7 @@
     public async Task GetCustomersOrders()
     {
         ordersList = await mongoConnection.GetCustomersOrders(userService.currentUser.Id);
-        ordersList = ordersList.Where(x => x.Status != Enums.OrderStatuses.IsDelivered).ToList();
+        ordersList = ordersList.Where(x => x.Status == Enums.OrderStatuses.IsDelivered).ToList();
     }
 
 }

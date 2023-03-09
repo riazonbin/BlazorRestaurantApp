@@ -373,7 +373,7 @@ namespace BlazorRestaurantApp.Services
             return await collection.FindAsync(x => x.CustomerId == customerId).Result.ToListAsync();
         }
 
-        public async Task<List<Order>> GetAllActiveOrders()
+        public async Task<List<Order>> GetAllOrders()
         {
             var collection = _database.GetCollection<Order>("OrdersCollection");
             return await collection.FindAsync(new BsonDocument()).Result.ToListAsync();
@@ -417,6 +417,7 @@ namespace BlazorRestaurantApp.Services
                     if (random.Next(1, 2) == 1)
                     {
                         order.Status = Enums.OrderStatuses.IsDelivered;
+                        order.OrderEndTime= DateTime.Now;
                     }
                 }
                 await collection.ReplaceOneAsync(x => x.Id == order.Id, order);

@@ -66,7 +66,7 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async => AddOrder())" Class="mt-4">Оплатить заказ</MudButton>
 </MudContainer>
 
-@code {
+    @code {
     private Cart currentCart = new Cart();
     private int tableNumber = 1;
 
@@ -104,6 +104,12 @@
 
     async Task AddOrder()
     {
+        if (DateTime.Now.TimeOfDay < new TimeSpan(7, 0, 0) || DateTime.Now.TimeOfDay > new TimeSpan(21, 30, 0))
+        {
+            Snackbar.Add("Ресторан не принимает заказы в это время!", Severity.Error);
+            return;
+        }
+
         if(await IsTableAvailable())
         {
             await mongoConnection.AddOrder(currentCart, tableNumber);

@@ -20,7 +20,10 @@
     <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
     <MudNavLink Icon="@Icons.Material.Filled.AccountBox" Href="/personal-info">Личный кабинет</MudNavLink>
     <MudNavLink Href="/menu" Icon="@Icons.Material.Filled.RestaurantMenu">Меню</MudNavLink>
-    <MudNavLink Href="/orders-details" Icon="@Icons.Material.Filled.List">Заказы</MudNavLink>
+    <MudNavGroup Icon="@Icons.Material.Filled.Work" Title="Заказы">
+        <MudNavLink Href="/orders-details" Icon="@Icons.Material.Filled.List">Текущие заказы</MudNavLink>
+        <MudNavLink Href="/orders-history" Icon="@Icons.Material.Filled.History">История заказов</MudNavLink>
+    </MudNavGroup>
 
     @if (userService.currentUser.Role == Enums.UserRoles.Customer)
     {

@@ -8,27 +8,30 @@
 @inject NavigationManager navManager;
 @inject ILocalStorageService localStorageService;
 @inject UserService userService;
+@inject ISnackbar Snackbar
 
 @page "/authorizationPage"
 
-<form @onsubmit="@(() => OnValidSubmit())">
-<MudGrid>
-    <MudItem xs="12" sm="7">
-        <MudCard>
-            <MudCardHeader><h2>Авторизация</h2></MudCardHeader>
-            <MudCardContent>
-                <MudTextField Label="Почта" Class="mt-3"
-                              @bind-Value="user.Email" For="@(() => user.Email)"/>
-                <MudTextField Label="Пароль" HelperText="Минимум 8 символов" Class="mt-3"
-                              @bind-Value="user.Password" For="@(() => user.Password)" InputType="InputType.Password"/>
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Войти</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
-</MudGrid>
-</form>
+<MudForm @ref="@_form" @onsubmit="@(() => OnSubmit())">
+    <MudContainer>
+        <MudGrid>
+            <MudItem xs="12" sm="12" lg="12">
+                <MudCard>
+                    <MudCardHeader><h2>Авторизация</h2></MudCardHeader>
+                    <MudCardContent>
+                        <MudTextField Label="Почта" Class="mt-3" Required
+                                        @bind-Value="user.Email" For="@(() => user.Email)"/>
+                        <MudTextField Label="Пароль" HelperText="Минимум 8 символов" Class="mt-3"
+                                        @bind-Value="user.Password" For="@(() => user.Password)" Required InputType="InputType.Password"/>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Войти</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudForm>
 
 @if (!isCorrectAuthorizationUser)
 {
@@ -38,13 +41,20 @@
 
 @code {
     User user = new User();
+    MudForm? _form;
 
     bool isCorrectAuthorizationUser = true;
 
-    private async Task OnValidSubmit()
+    private async Task OnSubmit()
     {
         isCorrectAuthorizationUser = true;
         User? foundedUser;
+
+        if(!_form.IsValid)
+        {
+            Snackbar.Add("Заполните все поля корректно!", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            return;
+        }
 
         if ((foundedUser = mongoConnection.FindUserByEmail(user.Email)) == null)
         {

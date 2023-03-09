@@ -13,28 +13,26 @@
 @inject IDialogService DialogService
 @inject NavigationManager navigationManager
 
-<MudPaper>
-    <MudContainer>
-        <MudGrid>
-            <MudItem xs="12">
-                <MudCard>
-                    <MudCardHeader>
-                        <h2 style="margin-right:2%">Личный кабинет</h2>
-                        <MudAvatar Color="Color.Info" Size="Size.Large">@model.Lastname[0]@model.Firstname[0]</MudAvatar>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudTextField T="string" Label="Фамилия" Disabled @bind-Text=@model.Lastname></MudTextField>
-                        <MudTextField T="string" Label="Имя" Disabled  @bind-Text=@model.Firstname></MudTextField>
-                        <MudTextField T="string" Label="Отчество" Disabled @bind-Text=@model.Patronymic></MudTextField>
-                        <MudTextField T="string" InputType="InputType.Email" Label="Почта" Disabled @bind-Text=@userService.currentUser.Email></MudTextField>
-                        <MudTextField T="string" InputType="InputType.Password" Label="Пароль" Disabled @bind-Text=@userService.currentUser.Password></MudTextField>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-        </MudGrid>
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardHeader>
+                    <h2 style="margin-right:2%">Личный кабинет</h2>
+                    <MudAvatar Color="Color.Info" Size="Size.Large">@model.Lastname[0]@model.Firstname[0]</MudAvatar>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudTextField T="string" Label="Фамилия" Disabled @bind-Text=@model.Lastname></MudTextField>
+                    <MudTextField T="string" Label="Имя" Disabled  @bind-Text=@model.Firstname></MudTextField>
+                    <MudTextField T="string" Label="Отчество" Disabled @bind-Text=@model.Patronymic></MudTextField>
+                    <MudTextField T="string" InputType="InputType.Email" Label="Почта" Disabled @bind-Text=@userService.currentUser.Email></MudTextField>
+                    <MudTextField T="string" InputType="InputType.Password" Label="Пароль" Disabled @bind-Text=@userService.currentUser.Password></MudTextField>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 
-    </MudContainer>
-</MudPaper>
+</MudContainer>
 
 @code {
     User model = new User();
