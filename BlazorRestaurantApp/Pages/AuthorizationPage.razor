@@ -20,9 +20,9 @@
                     <MudCardHeader><h2>Авторизация</h2></MudCardHeader>
                     <MudCardContent>
                         <MudTextField Label="Почта" Class="mt-3" Required
-                                        @bind-Value="user.Email" For="@(() => user.Email)"/>
+                                        @bind-Value="user.Email" Immediate For="@(() => user.Email)"/>
                         <MudTextField Label="Пароль" HelperText="Минимум 8 символов" Class="mt-3"
-                                        @bind-Value="user.Password" For="@(() => user.Password)" Required InputType="InputType.Password"/>
+                                        @bind-Value="user.Password" Immediate For="@(() => user.Password)" Required InputType="InputType.Password"/>
                     </MudCardContent>
                     <MudCardActions>
                         <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Войти</MudButton>
