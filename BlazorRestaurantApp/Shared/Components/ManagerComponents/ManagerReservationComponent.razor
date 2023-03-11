@@ -29,7 +29,7 @@
         <MudTd DataLabel="Действия"><MudButton Variant="Variant.Filled" OnClick="@(() => DeleteReservation(context.Id) )" Color="Color.Error">Удалить бронь</MudButton></MudTd>
         </RowTemplate>
         <PagerContent>
-            <MudTablePager RowsPerPageString="Кол-во строк в таблице" InfoFormat="{first_item}-{last_item} из {all_items}" />
+            <MudTablePager HidePagination RowsPerPageString="Кол-во строк в таблице" InfoFormat="{first_item}-{last_item} из {all_items}" />
             <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
         </PagerContent>
     </MudTable>
