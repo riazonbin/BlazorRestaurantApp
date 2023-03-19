@@ -12,6 +12,7 @@
 
     @if (userService.currentUser is null)
     {
+        <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Home">Домашняя страница</MudNavLink>
         <MudNavLink Href="/regPage" Icon="@Icons.Material.Filled.HowToReg">Регистрация</MudNavLink>
         <MudNavLink Href="/authorizationPage" Icon="@Icons.Material.Filled.SwitchAccount">Авторизация</MudNavLink>
         return;

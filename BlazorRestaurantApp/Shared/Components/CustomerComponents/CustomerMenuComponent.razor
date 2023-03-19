@@ -9,12 +9,6 @@
 @inject UserService userService
 @inject ISnackbar Snackbar;
 
-@if(isLoadingMenu)
-{
-    <MudProgressLinear Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
-    return;
-}
-
 <MudExpansionPanels>
     <MudExpansionPanel Text="Фильтр">
         <MudSelect T="DishTypes" Label="Тип блюда" @bind-Value="@(selectedDishTypeFilter)" Direction="Direction.Right" SelectedValuesChanged="@FilterMenuItems">
@@ -77,13 +71,6 @@
         menuItems = await mongoConnection.GetAllMenuItems();
         await CheckForUserCart();
         await base.OnInitializedAsync();
-    }
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        isLoadingMenu = false;
-        StateHasChanged();
-        return base.OnAfterRenderAsync(firstRender);
     }
 
     void FilterMenuItems()

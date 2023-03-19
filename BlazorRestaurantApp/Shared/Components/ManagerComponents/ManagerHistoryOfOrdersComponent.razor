@@ -13,7 +13,7 @@
     return;
 }
 <MudContainer>
-    <MudTable Items="ordersList" Dense="true" Outlined="true">
+    <MudTable @ref="@_table" Items="ordersList" Dense="true" Outlined="true">
         <ToolBarContent>
             <MudText Typo="Typo.h6">История заказов</MudText>
         </ToolBarContent>
@@ -33,23 +33,33 @@
             <MudTd DataLabel="Фамилия клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Lastname)</MudTd>
             <MudTd DataLabel="Имя клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Firstname)</MudTd>
             </RowTemplate>
+            <PagerContent>
+                <MudTablePager HidePagination RowsPerPageString="Кол-во строк в таблице" InfoFormat="{first_item}-{last_item} из {all_items}" />
+                <MudPagination  SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+            </PagerContent>
         </MudTable>
 
-                    <MudHidden>
-                        <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="5000" 
-        OnIntervalElapsed="@GetCustomersOrders" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
-                    </MudHidden>
+        <MudHidden>
+            <Majorsoft.Blazor.Components.Timer.AdvancedTimer AutoStart="true" IntervalInMilisec="5000" 
+            OnIntervalElapsed="@GetCustomersOrders" Occurring="Times.Infinite()"></Majorsoft.Blazor.Components.Timer.AdvancedTimer>
+        </MudHidden>
 
     </MudContainer>
 
     @code {
 
     List<Order> ordersList = new List<Order>();
+    private MudTable<Order> _table;
 
 
     protected override async Task OnInitializedAsync()
     {
         await GetCustomersOrders();
+    }
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
     }
 
     public async Task GetCustomersOrders()

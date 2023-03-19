@@ -20,14 +20,16 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="MudBlazor.Color.Inherit" Edge="Edge.Start"
                        OnClick="@((e) => DrawerToggle())" />
     <MudText Typo="Typo.h6" Class="px-4">
-        <MudImage Src="logo/restaurantLogo.png" Width="150" Height="100"></MudImage> 
+        <a href="/home">
+            <MudImage Src="logo/restaurantLogo.png" Width="150" Height="100"></MudImage> 
+        </a>
     </MudText>
 
         <MudSpacer />
         @if (userService.currentUser is not null)
         {
                 <a @onclick="@LogOut">Выйти</a>
-                <a href="/personalPage">
+                <a href="/personal-info">
                     <MudIconButton Edge="Edge.End">
                         <MudAvatar Color="Color.Info">@userService.currentUser?.Lastname[0]@userService.currentUser?.Firstname[0]</MudAvatar>
                     </MudIconButton>
