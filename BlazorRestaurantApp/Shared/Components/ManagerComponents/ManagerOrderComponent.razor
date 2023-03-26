@@ -34,7 +34,20 @@
                 .OfType<DisplayAttribute>()
                 .FirstOrDefault()?.Name;
             }
-            <MudTd DataLabel="Статус">@valueName</MudTd>
+            <MudTd DataLabel="Статус">
+                @if (context.Status == OrderStatuses.IsCooking || context.Status == OrderStatuses.IsCooked)
+                {
+                    <MudChip Color="Color.Warning">@valueName</MudChip>
+                }
+                else if (context.Status == OrderStatuses.IsDelivering)
+                {
+                    <MudChip Color="Color.Success">@valueName</MudChip>
+                }
+                else if (context.Status == OrderStatuses.InProgress)
+                {
+                    <MudChip Color="Color.Info">@valueName</MudChip>
+                }
+            </MudTd>
             <MudTd DataLabel="Общая стоимость">@(context.CartItems.Sum(i => i.MenuItem.Price * i.Quantity).ToString("C"))</MudTd>
             <MudTd DataLabel="Фамилия клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Lastname)</MudTd>
             <MudTd DataLabel="Имя клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Firstname)</MudTd>
