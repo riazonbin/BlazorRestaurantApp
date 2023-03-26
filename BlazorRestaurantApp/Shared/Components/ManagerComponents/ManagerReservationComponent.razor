@@ -12,9 +12,9 @@
     <HeaderContent>
         <MudTh>Начало брони<MudTableSortLabel SortBy="new Func<Reservation, object>(x => x.StartTimeOfReservation)"></MudTableSortLabel></MudTh>
         <MudTh>Конец брони<MudTableSortLabel SortBy="new Func<Reservation, object>(x => x.EndTimeOfReservation)"></MudTableSortLabel></MudTh>
-        <MudTh>Номер стола</MudTh>
-        <MudTh>Фамилия клиента</MudTh>
-        <MudTh>Имя клиента</MudTh>
+        <MudTh>Номер стола<MudTableSortLabel SortBy="new Func<Data.Table, object>(x => x.TableNumber)"></MudTableSortLabel></MudTh>
+        <MudTh>Фамилия клиента<MudTableSortLabel SortBy="new Func<Order, object>(x=> mongoConnection.FindCustomerById(x.CustomerId).Result.Lastname)"></MudTableSortLabel></MudTh>
+        <MudTh>Имя клиента<MudTableSortLabel SortBy="new Func<Order, object>(x=> mongoConnection.FindCustomerById(x.CustomerId).Result.Firstname)"></MudTableSortLabel></MudTh>
         <MudTh>Действия</MudTh>
     </HeaderContent>
     <RowTemplate>

@@ -13,17 +13,17 @@
     return;
 }
 <MudContainer>
-    <MudTable Items="ordersList" Dense="true" Outlined="true">
+    <MudTable @ref="@_table" Items="ordersList" Dense="true" Outlined="true">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Текущие заказы</MudText>
         </ToolBarContent>
         <HeaderContent>
             <MudTh>Заказ</MudTh>
-            <MudTh>Когда заказан</MudTh>
-            <MudTh>Статус</MudTh>
-            <MudTh>Общая стоимость</MudTh>
-            <MudTh>Фамилия клиента</MudTh>
-            <MudTh>Имя клиента</MudTh>
+            <MudTh>Когда заказан<MudTableSortLabel SortBy="new Func<Order, object>(x => x.OrderStartTime)"></MudTableSortLabel></MudTh>
+            <MudTh>Статус<MudTableSortLabel SortBy="new Func<Order, object>(x => x.Status)"></MudTableSortLabel></MudTh>
+            <MudTh>Общая стоимость<MudTableSortLabel SortBy="new Func<Order, object>(x => x.CartItems.Sum(i => i.MenuItem.Price * i.Quantity))"></MudTableSortLabel></MudTh>
+            <MudTh>Фамилия клиента<MudTableSortLabel SortBy="new Func<Order, object>(x=> mongoConnection.FindCustomerById(x.CustomerId).Result.Lastname)"></MudTableSortLabel></MudTh>
+            <MudTh>Имя клиента<MudTableSortLabel SortBy="new Func<Order, object>(x=> mongoConnection.FindCustomerById(x.CustomerId).Result.Firstname)"></MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Заказ">@context.Id</MudTd>
@@ -39,6 +39,12 @@
             <MudTd DataLabel="Фамилия клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Lastname)</MudTd>
             <MudTd DataLabel="Имя клиента">@(mongoConnection.FindCustomerById(context.CustomerId).Result.Firstname)</MudTd>
         </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager HidePagination RowsPerPageString="Кол-во строк в таблице" InfoFormat="{first_item}-{last_item} из {all_items}" />
+            <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+        </PagerContent>
+
     </MudTable>
 
                 <MudHidden>
@@ -51,6 +57,7 @@
     @code {
 
     List<Order> ordersList = new List<Order>();
+    private MudTable<Order> _table;
 
 
     protected override async Task OnInitializedAsync()
@@ -62,6 +69,11 @@
     {
         ordersList = await mongoConnection.GetAllOrders();
         ordersList = ordersList.Where(x => x.Status != Enums.OrderStatuses.IsDelivered).ToList();
+    }
+
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
     }
 
 }

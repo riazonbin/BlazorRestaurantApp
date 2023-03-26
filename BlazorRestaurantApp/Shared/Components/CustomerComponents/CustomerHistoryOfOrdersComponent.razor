@@ -19,14 +19,14 @@
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Заказ</MudTh>
-        <MudTh>Когда заказан</MudTh>
-        <MudTh>Когда доставлен</MudTh>
-        <MudTh>Общая стоимость</MudTh>
+        <MudTh>Когда заказан<MudTableSortLabel SortBy="new Func<Order, object>(x => x.OrderStartTime)"></MudTableSortLabel></MudTh>
+        <MudTh>Когда доставлен<MudTableSortLabel SortBy="new Func<Order, object>(x => x.OrderEndTime)"></MudTableSortLabel></MudTh>
+        <MudTh>Общая стоимость<MudTableSortLabel SortBy="new Func<Order, object>(x => x.CartItems.Sum(i => i.MenuItem.Price * i.Quantity))"></MudTableSortLabel></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Заказ">@context.Id</MudTd>
         <MudTd DataLabel="Когда заказан">@context.OrderStartTime</MudTd>
-        <MudTd DataLabel="Когда заказан">@context.OrderEndTime</MudTd>
+        <MudTd DataLabel="Когда доставлен">@context.OrderEndTime</MudTd>
         <MudTd DataLabel="Общая стоимость">@(context.CartItems.Sum(i => i.MenuItem.Price * i.Quantity).ToString("C"))</MudTd>
     </RowTemplate>
     <PagerContent>

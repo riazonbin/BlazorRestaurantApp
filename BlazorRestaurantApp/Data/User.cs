@@ -11,7 +11,6 @@ namespace BlazorRestaurantApp.Data
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
-
         [Required(ErrorMessage = "Фамилия должна быть заполнена!")]
         [StringLength(30, ErrorMessage = "Минимальное кол-во символов в фамилии 4, максимальное - 30!", MinimumLength = 4)]
         [RegularExpression("^[А-Яа-я]+$", ErrorMessage = "Фамилия не может содержать цифр или букв не на кириллице!")]
