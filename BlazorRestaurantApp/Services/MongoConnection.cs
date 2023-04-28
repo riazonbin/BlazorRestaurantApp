@@ -191,7 +191,7 @@ namespace BlazorRestaurantApp.Services
                 .Where(x => x.StartTimeOfReservation <= DateTime.Now
                 && x.EndTimeOfReservation >= DateTime.Now
                 && x.ReservedCustomerId != userId
-                || x.StartTimeOfReservation.Subtract(DateTime.Now).TotalMinutes <= StaticData.ReservationTime
+                || x.StartTimeOfReservation.Subtract(DateTime.Now).TotalMinutes <= StaticData.ReservationTimeMinutes
                 && x.ReservedCustomerId != userId).ToList();
 
             if (query.Count == 0)
@@ -215,7 +215,7 @@ namespace BlazorRestaurantApp.Services
                 var results = reservations
                     .Where(x => x.StartTimeOfReservation <= timeOfReservation
                 && x.EndTimeOfReservation >= timeOfReservation
-                || x.StartTimeOfReservation.Subtract(timeOfReservation).TotalMinutes <= StaticData.ReservationTime).ToList();
+                || x.StartTimeOfReservation.Subtract(timeOfReservation).TotalMinutes <= StaticData.ReservationTimeMinutes).ToList();
 
                 if(results.Count == 0)
                 {

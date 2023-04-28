@@ -5,7 +5,7 @@ namespace BlazorRestaurantApp.Services
 {
     public class TimerService
     {
-        private PeriodicTimer _timer = new(TimeSpan.FromSeconds(StaticData.TimerInterval));
+        private PeriodicTimer _timer = new(TimeSpan.FromSeconds(StaticData.TimerIntervalInSeconds));
         public Action Elapsed;
 
 
