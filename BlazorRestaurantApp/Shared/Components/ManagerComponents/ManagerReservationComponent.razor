@@ -42,10 +42,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await GetReservationByCustomerId();
+        await mongoConnection.DeleteOldReservations();
+        await GetAllCustomersReservations();
     }
 
-    public async Task GetReservationByCustomerId()
+    public async Task GetAllCustomersReservations()
     {
         reservations = await mongoConnection.GetAllReservations();
     }
@@ -58,7 +59,7 @@
     public async Task DeleteReservation(string reservationId)
     {
         await mongoConnection.DeleteReservationById(reservationId);
-        await GetReservationByCustomerId();
+        await GetAllCustomersReservations();
     }
 
 }
