@@ -23,7 +23,7 @@
             />
             <MudTimePicker Label="Время" PickerVariant="PickerVariant.Inline" 
                 Required="true" Error="@(!IsTimeCorrect())" 
-                @bind-Time="_time" ErrorText="Укажите корректное время">
+                @bind-Time="_time" ErrorText="Укажите корректное время (бронирование доступно с 7:00 до 19:00 часов)">
             </MudTimePicker>
             <MudSelect Label="Число мест за столом" @bind-Value="_seats">
                 <MudSelectItem Value="2"></MudSelectItem>

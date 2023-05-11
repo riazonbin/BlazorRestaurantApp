@@ -59,7 +59,7 @@
         <br />
 
             <MudNumericField T="int" @bind-Value="tableNumber" Min="1" Max="40" Label="Номер стола" Error="@(!IsTableAvailable().Result)" ErrorText="Столик занят" Clearable 
-            Style="width: 20%" HelperText="1-40"></MudNumericField>
+            Style="width: 20%" HelperText="1-40" Immediate></MudNumericField>
         
         <br />
 
